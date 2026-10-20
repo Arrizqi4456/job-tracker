@@ -184,6 +184,7 @@
         </section>
     </main>
 
+    <!-- Form Modal Overlay -->
     <div id="form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true" onclick="closeModal()"></div>
@@ -267,6 +268,7 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal -->
     <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
@@ -293,6 +295,7 @@
         </div>
     </div>
 
+    <!-- Toast UI Element -->
     <div id="toast-notification" class="fixed bottom-6 right-6 transform translate-y-24 opacity-0 transition-all duration-300 z-50 rounded-lg shadow-lg max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pointer-events-none">
         <div class="p-4 flex items-start gap-3">
             <i id="toast-icon" class="fa-solid fa-circle-info text-blue-500 text-lg mt-0.5"></i>
@@ -304,28 +307,34 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Konfigurasi Asli Milik Anda
+        // KODE FIREBASE YANG DIAMBIL DARI TANGKAPAN LAYAR ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyD_vmv82okTt_CLpkgd9oPA1hlrGitWDuo",
             authDomain: "job-tracker-d664b.firebaseapp.com",
             projectId: "job-tracker-d664b",
             storageBucket: "job-tracker-d664b.firebasestorage.app",
             messagingSenderId: "207506154246",
-            appId: "1:207506154246:web:0761f44f2ffcf2bf117487"
+            appId: "1:207506154246:web:0761f44f2ffcf2bf117487",
+            measurementId: "G-0TBKWBW3HR"
         };
         
-        const appId = firebaseConfig.projectId; 
-        
+        const appId = firebaseConfig.projectId; // Digunakan untuk nama folder di Database
+        const authToken = null;
+
         let app, db, auth;
         let isOfflineMode = false;
         try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            } else {
+                isOfflineMode = true;
+            }
         } catch(e) { console.error("Firebase init error", e); isOfflineMode = true; }
 
         // --- State Management ---
@@ -347,6 +356,7 @@
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
 
+        // --- Toast System ---
         window.showToast = function(title, message, type = "info") {
             const toast = document.getElementById('toast-notification');
             const toastIcon = document.getElementById('toast-icon');
@@ -354,6 +364,7 @@
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-message').innerText = message;
             
+            // Set Icon type
             toastIcon.className = "fa-solid text-lg mt-0.5 ";
             if(type === 'success') toastIcon.className += "fa-circle-check text-green-500";
             else if(type === 'error') toastIcon.className += "fa-circle-xmark text-red-500";
@@ -419,23 +430,46 @@
                 return;
             }
 
+            try {
+                // Awal mula login
+                if (authToken) {
+                    await signInWithCustomToken(auth, authToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Autentikasi Error:", error);
+                if (error.code === 'auth/api-key-not-valid') {
+                    showToast("API Key Salah", "Harap ganti apiKey di dalam kode dengan kunci asli dari Firebase Anda.", "error");
+                    runLocalMode(); // Paksa masuk ke mode offline jika kunci salah
+                    return;
+                }
+            }
+
+            // Dengarkan perubahan state akun (Anonim -> Login Google -> Logout)
             onAuthStateChanged(auth, (user) => {
                 updateAuthUI(user);
                 setupDataListener(user);
             });
             
+            // Setup Google Provider Login
             const googleProvider = new GoogleAuthProvider();
-            document.getElementById('login-btn').addEventListener('click', () => {
-                // Perbaikan Kunci: Menggunakan Redirect agar bebas blokir popup
-                document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-gray-500"></i> <span class="hidden sm:inline">Mengalihkan...</span>';
-                signInWithRedirect(auth, googleProvider);
+            document.getElementById('login-btn').addEventListener('click', async () => {
+                try {
+                    document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-gray-500"></i> <span class="hidden sm:inline">Memuat...</span>';
+                    await signInWithPopup(auth, googleProvider);
+                    showToast("Login Berhasil", "Data Anda kini tersimpan di akun Google.", "success");
+                } catch(error) {
+                    showToast("Login Batal", "Proses login tidak diselesaikan.", "warning");
+                    updateAuthUI(auth.currentUser); // Reset tombol
+                }
             });
 
             document.getElementById('logout-btn').addEventListener('click', async () => {
                 try {
                     await signOut(auth);
                     showToast("Logout Berhasil", "Anda kembali sebagai tamu.", "info");
-                    await signInAnonymously(auth); 
+                    await signInAnonymously(auth); // Kembali ke mode anonim
                 } catch(e) {
                     showToast("Gagal Logout", e.message, "error");
                 }
@@ -448,8 +482,10 @@
             if (storedData) jobs = JSON.parse(storedData);
             renderTable();
             updateStats();
+            
+            // Tampilkan peringatan jika tidak di lingkungan cloud
             document.getElementById('login-btn').addEventListener('click', () => {
-                showToast("Mode Offline", "Koneksi ke Firebase gagal.", "warning");
+                showToast("Mode Offline Aktif", "Anda harus mengunduh file dan mengatur Firebase Config sendiri untuk menggunakan fitur Login Google.", "warning");
             });
             document.getElementById('auth-container').classList.remove('hidden');
             document.getElementById('auth-container').classList.add('flex');
@@ -468,15 +504,19 @@
             loginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login Google</span>';
 
             if (user && !user.isAnonymous) {
+                // Tampilan jika sudah login Google
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
+                
                 userName.innerText = user.displayName || 'Pengguna';
                 userName.classList.remove('hidden');
+                
                 if (user.photoURL) {
                     userAvatar.src = user.photoURL;
                     userAvatar.classList.remove('hidden');
                 }
             } else {
+                // Tampilan jika tamu/belum login
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
                 userName.classList.add('hidden');
@@ -485,6 +525,7 @@
         }
 
         function setupDataListener(user) {
+            // Hentikan listener lama jika ada
             if (unsubscribeSnapshot) {
                 unsubscribeSnapshot();
                 unsubscribeSnapshot = null;
@@ -499,6 +540,8 @@
             }
 
             userId = user.uid;
+            
+            // Mengambil data secara live (Real-time) dari Cloud untuk user aktif
             const jobsCollection = collection(db, 'artifacts', appId, 'users', userId, 'jobs');
             unsubscribeSnapshot = onSnapshot(jobsCollection, (snapshot) => {
                 jobs = [];
@@ -509,7 +552,7 @@
                 updateStats();
             }, (error) => {
                 console.error("Error fetching data:", error);
-                showToast("Error", "Gagal memuat data.", "error");
+                showToast("Error", "Gagal memuat data dari cloud.", "error");
             });
         }
 
@@ -521,6 +564,7 @@
                 htmlElement.classList.remove('dark');
                 themeIcon.classList.replace('fa-sun', 'fa-moon');
             }
+
             initCloud();
         }
 
@@ -547,6 +591,7 @@
 
         function updateStats() {
             document.getElementById('stat-total').innerText = jobs.length;
+            
             const interviewStatuses = ['Interview HR', 'Interview User', 'Tes Teknis'];
             document.getElementById('stat-interview').innerText = jobs.filter(j => interviewStatuses.includes(j.status)).length;
             document.getElementById('stat-offered').innerText = jobs.filter(j => j.status === 'Diterima').length;
@@ -590,11 +635,18 @@
             if (displayJobs.length === 0) {
                 jobTableBody.parentElement.parentElement.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
+                if ((searchTerm || filterValue) && jobs.length > 0) {
+                    emptyState.querySelector('h3').innerText = "Data tidak ditemukan";
+                    emptyState.querySelector('p').innerText = "Coba ubah kata kunci atau filter status Anda.";
+                    emptyState.querySelector('button').classList.add('hidden');
+                } else {
+                    emptyState.querySelector('h3').innerText = "Belum ada data";
+                    emptyState.querySelector('p').innerText = "Mulai melacak perjalanan karir Anda dengan menambahkan data lamaran pertama Anda.";
+                    emptyState.querySelector('button').classList.remove('hidden');
+                }
             } else {
                 jobTableBody.parentElement.parentElement.classList.remove('hidden');
                 emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
 
                 displayJobs.forEach(job => {
                     const tr = document.createElement('tr');
@@ -617,7 +669,7 @@
                     }
                     tr.className = `${highlightClass} transition-colors group`;
                     
-                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-2"><i class="fa-solid fa-external-link-alt text-xs"></i></a>` : '';
+                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-2" title="Buka Lowongan"><i class="fa-solid fa-external-link-alt text-xs"></i></a>` : '';
 
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -637,8 +689,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Edit Data">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30" title="Hapus Data">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     `;
@@ -678,6 +734,7 @@
                     await setDoc(jobRef, newJob);
                     showToast("Tersimpan!", "Data berhasil disimpan ke cloud.", "success");
                 } catch (error) {
+                    console.error("Gagal menyimpan:", error);
                     showToast("Gagal", "Terjadi kesalahan saat menyimpan ke cloud.", "error");
                 }
             } else {
@@ -729,7 +786,41 @@
         });
 
         window.exportToCSV = function() {
-            if (jobs.length === 0) return showToast("Data Kosong", "Tidak ada data untuk diexport.", "warning");
+            if (jobs.length === 0) {
+                showToast("Data Kosong", "Tidak ada data lamaran untuk di-export.", "warning");
+                return;
+            }
+            
+            // 1. Export CSV (Untuk Excel)
+            const headers = ['Perusahaan', 'Posisi', 'Tanggal Melamar', 'Status', 'URL', 'Sumber', 'Kontak/PIC', 'Jadwal Lanjutan', 'Gaji', 'Catatan'];
+            const csvRows = [headers.join(',')];
+            
+            jobs.forEach(job => {
+                const values = [
+                    `"${(job.company || '').replace(/"/g, '""')}"`,
+                    `"${(job.position || '').replace(/"/g, '""')}"`,
+                    `"${job.dateApplied || ''}"`,
+                    `"${job.status || ''}"`,
+                    `"${job.jobUrl || ''}"`,
+                    `"${(job.source || '').replace(/"/g, '""')}"`,
+                    `"${(job.pic || '').replace(/"/g, '""')}"`,
+                    `"${job.nextSchedule || ''}"`,
+                    `"${(job.salary || '').replace(/"/g, '""')}"`,
+                    `"${(job.notes || '').replace(/"/g, '""')}"`
+                ];
+                csvRows.push(values.join(','));
+            });
+            
+            const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const linkCSV = document.createElement("a");
+            linkCSV.setAttribute("href", encodedUri);
+            linkCSV.setAttribute("download", `Data_Lamaran_Kerja_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(linkCSV);
+            linkCSV.click();
+            document.body.removeChild(linkCSV);
+
+            // 2. Export JSON (Untuk Backup & Restore antar perangkat)
             const jsonContent = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jobs));
             const linkJSON = document.createElement("a");
             linkJSON.setAttribute("href", jsonContent);
@@ -737,17 +828,20 @@
             document.body.appendChild(linkJSON);
             linkJSON.click();
             document.body.removeChild(linkJSON);
-            showToast("Sukses", "File Backup JSON berhasil didownload.", "success");
+            
+            showToast("Sukses Export", "File CSV (Excel) dan JSON (Backup) berhasil didownload.", "success");
         };
 
         window.importData = function(event) {
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importedJobs = JSON.parse(e.target.result);
                     if (Array.isArray(importedJobs)) {
+                        // Gabungkan data lama dan baru (menghindari duplikat)
                         const existingIds = new Set(jobs.map(j => j.id));
                         let addedCount = 0;
                         importedJobs.forEach(job => {
@@ -756,15 +850,18 @@
                                 addedCount++;
                             }
                         });
+                        
                         localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
                         renderTable();
                         updateStats();
-                        showToast("Sukses", `${addedCount} data baru ditambahkan.`, "success");
+                        showToast("Import Berhasil", `${addedCount} data baru berhasil ditambahkan dari file backup.`, "success");
+                    } else {
+                        showToast("Gagal Import", "Format file backup tidak sesuai.", "error");
                     }
                 } catch (error) {
-                    showToast("Gagal", "Format file tidak sesuai.", "error");
+                    showToast("Gagal Import", "File tidak valid. Harap masukkan file .json hasil export.", "error");
                 }
-                event.target.value = ''; 
+                event.target.value = ''; // Reset input agar bisa dipakai lagi
             };
             reader.readAsText(file);
         };
@@ -773,6 +870,7 @@
         statusFilter.addEventListener('change', () => renderTable());
 
         init();
+
     </script>
 </body>
 </html>
