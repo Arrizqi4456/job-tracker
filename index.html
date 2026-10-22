@@ -69,33 +69,49 @@
                     <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">JobTracker</span>
                 </div>
                 
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <!-- Auth Container (Google Login) -->
-                    <div id="auth-container" class="hidden items-center gap-2">
-                        <img id="user-avatar" src="" alt="User" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full hidden border border-gray-200 dark:border-gray-600">
-                        <span id="user-name" class="text-sm font-medium hidden sm:block text-gray-700 dark:text-gray-300 max-w-[120px] truncate"></span>
-                        
-                        <button id="login-btn" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-2 shadow-sm">
-                            <i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login Google</span>
+                <div class="flex items-center gap-3 sm:gap-4 relative">
+                    <!-- Auth Container (Google Login & Profile Popup Trigger) -->
+                    <div id="auth-container" class="flex items-center gap-2 relative">
+                        <button id="login-btn" type="button" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
+                            <i class="fa-brands fa-google text-red-500"></i> <span>Login Google</span>
                         </button>
-                        
-                        <button id="logout-btn" class="hidden text-gray-500 hover:text-red-600 dark:hover:text-red-400 p-2 rounded-lg transition-colors" title="Keluar Akun">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
+
+                        <!-- Logged-in User Pill -->
+                        <div id="user-profile-pill" class="hidden items-center gap-2 bg-gray-50 dark:bg-gray-700/60 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-600">
+                            <img id="user-avatar" src="" alt="User" class="w-7 h-7 rounded-full border border-primary-500 object-cover">
+                            <div class="hidden sm:flex flex-col text-left leading-tight">
+                                <span id="user-name" class="text-xs font-semibold text-gray-800 dark:text-gray-100 max-w-[120px] truncate"></span>
+                                <span id="user-email" class="text-[10px] text-gray-500 dark:text-gray-400 max-w-[120px] truncate"></span>
+                            </div>
+                            <button id="logout-btn" type="button" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-full transition-colors" title="Keluar Akun">
+                                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button id="theme-toggle" type="button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <i id="theme-icon" class="fa-solid fa-moon text-gray-600 dark:text-gray-300 text-lg"></i>
                     </button>
-                    <button onclick="openModal()" class="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center gap-2">
+                    <button type="button" onclick="openModal()" class="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Tambah Lamaran</span>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <div id="toast-notification" class="fixed top-20 right-4 sm:right-6 transform -translate-y-8 opacity-0 transition-all duration-300 z-50 rounded-xl shadow-xl max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pointer-events-none">
+        <div class="p-4 flex items-start gap-3">
+            <img id="toast-avatar" src="" alt="" class="w-9 h-9 rounded-full hidden border border-primary-500 flex-shrink-0">
+            <i id="toast-icon" class="fa-solid fa-circle-info text-blue-500 text-xl mt-0.5"></i>
+            <div class="flex-1 min-w-0">
+                <p id="toast-title" class="text-sm font-bold text-gray-900 dark:text-white truncate"></p>
+                <p id="toast-message" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-words"></p>
+            </div>
+        </div>
+    </div>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
@@ -141,10 +157,10 @@
                             <option value="Diterima">Diterima</option>
                             <option value="Ditolak">Ditolak</option>
                         </select>
-                        <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0">
+                        <button type="button" onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0">
                             <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Export / Backup</span>
                         </button>
-                        <button onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Pindahkan data dari HP/Laptop lain">
+                        <button type="button" onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Pindahkan data dari HP/Laptop lain">
                             <i class="fa-solid fa-file-import"></i> <span class="hidden sm:inline">Import Data</span>
                         </button>
                         <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
@@ -176,7 +192,7 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">Belum ada data</h3>
                     <p class="text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Mulai melacak perjalanan karir Anda dengan menambahkan data lamaran pertama Anda.</p>
-                    <button onclick="openModal()" class="mt-4 text-primary-600 hover:text-primary-700 font-medium">
+                    <button type="button" onclick="openModal()" class="mt-4 text-primary-600 hover:text-primary-700 font-medium">
                         + Tambah Lamaran Sekarang
                     </button>
                 </div>
@@ -184,7 +200,6 @@
         </section>
     </main>
 
-    <!-- Form Modal Overlay -->
     <div id="form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true" onclick="closeModal()"></div>
@@ -268,7 +283,6 @@
         </div>
     </div>
 
-    <!-- Custom Confirm Modal -->
     <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
@@ -299,34 +313,22 @@
     <div id="debug-panel" class="hidden fixed top-20 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-2xl z-50">
         <div class="flex justify-between items-start">
             <div class="flex-1">
-                <h3 class="text-red-800 font-bold text-lg mb-1"><i class="fa-solid fa-bug mr-2"></i>Sistem Mendeteksi Error</h3>
-                <p id="debug-message" class="text-sm text-red-600 font-mono break-all mb-2"></p>
-                <p id="debug-solution" class="text-sm text-gray-800 mt-2 font-medium bg-white p-3 rounded border border-red-200"></p>
+                <h3 class="text-red-800 font-bold text-lg mb-1"><i class="fa-solid fa-bug mr-2"></i>Sistem Mendeteksi Kendala</h3>
+                <p id="debug-message" class="text-xs text-red-600 font-mono break-all mb-2"></p>
+                <div id="debug-solution" class="text-xs text-gray-800 mt-2 font-medium bg-white p-3 rounded border border-red-200"></div>
             </div>
-            <button onclick="document.getElementById('debug-panel').classList.add('hidden')" class="text-gray-400 hover:text-red-500 ml-4"><i class="fa-solid fa-times text-xl"></i></button>
-        </div>
-    </div>
-
-    <!-- Toast UI Element -->
-    <div id="toast-notification" class="fixed bottom-6 right-6 transform translate-y-24 opacity-0 transition-all duration-300 z-50 rounded-lg shadow-lg max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pointer-events-none">
-        <div class="p-4 flex items-start gap-3">
-            <i id="toast-icon" class="fa-solid fa-circle-info text-blue-500 text-lg mt-0.5"></i>
-            <div>
-                <p id="toast-title" class="text-sm font-semibold text-gray-900 dark:text-white"></p>
-                <p id="toast-message" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
-            </div>
+            <button type="button" onclick="document.getElementById('debug-panel').classList.add('hidden')" class="text-gray-400 hover:text-red-500 ml-4"><i class="fa-solid fa-times text-xl"></i></button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // KODE FIREBASE ANDA
+        // KONFIGURASI FIREBASE ASLI MILIK ANDA (SUDAH TERPASANG)
         const firebaseConfig = {
-            // HAPUS TEKS DI BAWAH INI DAN PASTE API KEY ASLI ANDA DI DALAM TANDA KUTIP
-            apiKey: "GANTI_DENGAN_API_KEY_ASLI_ANDA",
+            apiKey: "AIzaSyD_vmv82okTt_Clpkgd9oPA1hlrGitWDuo",
             authDomain: "job-tracker-d664b.firebaseapp.com",
             projectId: "job-tracker-d664b",
             storageBucket: "job-tracker-d664b.firebasestorage.app",
@@ -339,45 +341,6 @@
 
         let app, db, auth;
         let isOfflineMode = false;
-        
-        // FUNGSI PENANGKAP ERROR CERDAS
-        function handleAuthError(error) {
-            let solution = "Terjadi kesalahan sistem. Cek koneksi internet Anda.";
-            
-            if (error.code === 'auth/api-key-not-valid') {
-                solution = "API Key Anda salah/tidak valid. Pastikan Anda menyalin teks apiKey yang benar dari Pengaturan Proyek Firebase Anda, lalu masukkan ke dalam kode HTML ini di bagian firebaseConfig.";
-            } else if (error.code === 'auth/unauthorized-domain') {
-                solution = "Domain belum diotorisasi. Anda harus menambahkan 'arrizqi4456.github.io' ke menu Authentication > Settings > Authorized Domains di dasbor Firebase Anda.";
-            } else if (error.code === 'auth/popup-closed-by-user') {
-                solution = "Anda (atau Browser Anda) menutup jendela login sebelum proses selesai. Jika ini terjadi otomatis, periksa apakah ada pemblokir popup aktif di ujung kanan kolom alamat browser Anda.";
-            } else if (error.code === 'auth/popup-blocked') {
-                solution = "Browser Anda secara agresif memblokir popup Google. Izinkan sembulan (popup) untuk website ini di pengaturan peramban Anda.";
-            } else if (error.code === 'auth/network-request-failed') {
-                solution = "Koneksi internet terputus atau diblokir oleh firewall/antivirus.";
-            }
-            
-            // Tampilkan panel error
-            document.getElementById('debug-panel').classList.remove('hidden');
-            document.getElementById('debug-message').innerText = `Kode Error: ${error.code}\nPesan Asli: ${error.message}`;
-            document.getElementById('debug-solution').innerHTML = `<b>💡 SOLUSI:</b><br>${solution}`;
-            
-            console.error("Firebase Auth Error:", error);
-            showToast("Sistem Terkendala", "Lihat pesan error di atas layar", "error");
-            updateAuthUI(auth ? auth.currentUser : null);
-        }
-
-        try {
-            if (Object.keys(firebaseConfig).length > 0) {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-            } else {
-                isOfflineMode = true;
-            }
-        } catch(e) { 
-            console.error("Firebase init error", e); 
-            isOfflineMode = true; 
-        }
 
         // --- State Management ---
         let jobs = [];
@@ -398,23 +361,53 @@
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
 
-        // --- Toast System ---
-        window.showToast = function(title, message, type = "info") {
+        window.showToast = function(title, message, type = "info", avatarUrl = null) {
             const toast = document.getElementById('toast-notification');
             const toastIcon = document.getElementById('toast-icon');
+            const toastAvatar = document.getElementById('toast-avatar');
             
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-message').innerText = message;
             
-            toastIcon.className = "fa-solid text-lg mt-0.5 ";
-            if(type === 'success') toastIcon.className += "fa-circle-check text-green-500";
-            else if(type === 'error') toastIcon.className += "fa-circle-xmark text-red-500";
-            else if(type === 'warning') toastIcon.className += "fa-triangle-exclamation text-yellow-500";
-            else toastIcon.className += "fa-circle-info text-blue-500";
+            if (avatarUrl) {
+                toastAvatar.src = avatarUrl;
+                toastAvatar.classList.remove('hidden');
+                toastIcon.classList.add('hidden');
+            } else {
+                toastAvatar.classList.add('hidden');
+                toastIcon.className = "fa-solid text-xl mt-0.5 ";
+                if(type === 'success') toastIcon.className += "fa-circle-check text-green-500";
+                else if(type === 'error') toastIcon.className += "fa-circle-xmark text-red-500";
+                else if(type === 'warning') toastIcon.className += "fa-triangle-exclamation text-yellow-500";
+                else toastIcon.className += "fa-circle-info text-blue-500";
+            }
 
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 4000);
+            toast.classList.remove('-translate-y-8', 'opacity-0');
+            setTimeout(() => { toast.classList.add('-translate-y-8', 'opacity-0'); }, 4500);
         };
+
+        function handleAuthError(error) {
+            let solution = "Terjadi kesalahan sistem. Cek koneksi internet Anda.";
+            
+            if (error.code === 'auth/api-key-not-valid') {
+                solution = "API Key tidak valid. Pastikan API Key di dalam firebaseConfig sudah sesuai dengan Firebase Console.";
+            } else if (error.code === 'auth/unauthorized-domain') {
+                solution = "Domain belum diotorisasi. Tambahkan domain website Anda ke menu Authentication > Settings > Authorized Domains di Firebase Console.";
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                showToast("Login Dibatalkan", "Jendela pilih akun Google ditutup sebelum selesai.", "warning");
+                updateAuthUI(auth ? auth.currentUser : null);
+                return;
+            } else if (error.code === 'permission-denied') {
+                solution = "Database Firestore masih terkunci. Buka Firebase Console > Firestore Database > tab Rules (Aturan), ubah menjadi 'allow read, write: if request.auth != null;' lalu klik Publish.";
+            }
+            
+            document.getElementById('debug-panel').classList.remove('hidden');
+            document.getElementById('debug-message').innerText = `Kode: ${error.code || 'Error'} | ${error.message}`;
+            document.getElementById('debug-solution').innerHTML = `<b>💡 SOLUSI:</b><br>${solution}`;
+            
+            console.error("Firebase Error:", error);
+            updateAuthUI(auth ? auth.currentUser : null);
+        }
 
         window.openModal = function() {
             jobForm.reset();
@@ -462,96 +455,121 @@
             confirmModal.classList.add('hidden');
         };
 
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch(e) { 
+            console.error("Firebase init error", e); 
+            isOfflineMode = true; 
+        }
+
         async function initCloud() {
+            // Load data lokal terlebih dahulu agar tabel langsung tampil
+            loadLocalJobs();
+
             if (isOfflineMode || !auth) {
-                runLocalMode();
                 return;
             }
 
-            // MENGATASI HASIL KEMBALIAN DARI REDIRECT (Pindah Halaman)
-            try {
-                const redirectResult = await getRedirectResult(auth);
-                if (redirectResult) {
-                    showToast("Berhasil Masuk", "Data tersinkronisasi.", "success");
-                }
-            } catch (error) {
-                handleAuthError(error);
-            }
-
-            try {
-                // Mencoba login diam-diam. Jika gagal karena API Key salah, ini akan terdeteksi!
-                await signInAnonymously(auth);
-            } catch (error) {
-                handleAuthError(error);
-                runLocalMode(); 
-                return;
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                updateAuthUI(user);
-                setupDataListener(user);
-            });
-            
             const googleProvider = new GoogleAuthProvider();
-            
-            document.getElementById('login-btn').addEventListener('click', () => {
+            googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+            // Pasang event listener tombol Login Google secara langsung (tidak akan terhalang error lain)
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.addEventListener('click', async () => {
+                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-primary-600"></i> <span>Membuka Google...</span>';
+                loginBtn.disabled = true;
                 try {
-                    document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-gray-500"></i> <span class="hidden sm:inline">Mengalihkan...</span>';
-                    // Menggunakan signInWithRedirect agar aman dari pemblokir popup browser
-                    signInWithRedirect(auth, googleProvider);
-                } catch(error) {
+                    // Membuka popup pilih akun Google
+                    const result = await signInWithPopup(auth, googleProvider);
+                    if (result && result.user) {
+                        showToast(
+                            `Halo, ${result.user.displayName || 'Pengguna'}!`,
+                            `Berhasil masuk dengan ${result.user.email}`,
+                            "success",
+                            result.user.photoURL
+                        );
+                    }
+                } catch (error) {
+                    // Jika browser memblokir popup, otomatis alihkan dengan Redirect
+                    if (error.code === 'auth/popup-blocked') {
+                        showToast("Mengalihkan...", "Membuka halaman login Google...", "info");
+                        signInWithRedirect(auth, googleProvider);
+                        return;
+                    }
                     handleAuthError(error);
+                } finally {
+                    loginBtn.disabled = false;
+                    updateAuthUI(auth.currentUser);
                 }
             });
 
+            // Pasang event listener tombol Logout
             document.getElementById('logout-btn').addEventListener('click', async () => {
                 try {
                     await signOut(auth);
-                    showToast("Logout Berhasil", "Anda kembali sebagai tamu.", "info");
-                    await signInAnonymously(auth); 
+                    showToast("Logout Berhasil", "Anda telah keluar dari akun Google.", "info");
                 } catch(e) {
                     showToast("Gagal Logout", e.message, "error");
                 }
             });
+
+            // Tangkap hasil jika menggunakan fallback Redirect
+            try {
+                const redirectResult = await getRedirectResult(auth);
+                if (redirectResult && redirectResult.user) {
+                    showToast(
+                        `Halo, ${redirectResult.user.displayName || 'Pengguna'}!`,
+                        `Berhasil masuk dengan ${redirectResult.user.email}`,
+                        "success",
+                        redirectResult.user.photoURL
+                    );
+                }
+            } catch (error) {
+                handleAuthError(error);
+            }
+
+            // Pantau status login pengguna
+            onAuthStateChanged(auth, (user) => {
+                updateAuthUI(user);
+                setupDataListener(user);
+            });
         }
 
-        function runLocalMode() {
-            document.getElementById('auth-container').classList.add('hidden');
+        function loadLocalJobs() {
             const storedData = localStorage.getItem('jobTrackerData_v1');
-            if (storedData) jobs = JSON.parse(storedData);
+            if (storedData) {
+                try {
+                    jobs = JSON.parse(storedData);
+                } catch (e) {
+                    jobs = [];
+                }
+            }
             renderTable();
             updateStats();
-            
-            document.getElementById('auth-container').classList.remove('hidden');
-            document.getElementById('auth-container').classList.add('flex');
         }
 
         function updateAuthUI(user) {
             const loginBtn = document.getElementById('login-btn');
-            const logoutBtn = document.getElementById('logout-btn');
+            const userProfilePill = document.getElementById('user-profile-pill');
             const userName = document.getElementById('user-name');
+            const userEmail = document.getElementById('user-email');
             const userAvatar = document.getElementById('user-avatar');
-            const authContainer = document.getElementById('auth-container');
-            
-            authContainer.classList.remove('hidden');
-            authContainer.classList.add('flex');
 
-            loginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login Google</span>';
+            loginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span>Login Google</span>';
 
             if (user && !user.isAnonymous) {
                 loginBtn.classList.add('hidden');
-                logoutBtn.classList.remove('hidden');
+                userProfilePill.classList.remove('hidden');
+                userProfilePill.classList.add('flex');
                 userName.innerText = user.displayName || 'Pengguna';
-                userName.classList.remove('hidden');
-                if (user.photoURL) {
-                    userAvatar.src = user.photoURL;
-                    userAvatar.classList.remove('hidden');
-                }
+                userEmail.innerText = user.email || 'Tersinkronisasi';
+                userAvatar.src = user.photoURL || 'https://placehold.co/64x64/2563eb/ffffff?text=U';
             } else {
                 loginBtn.classList.remove('hidden');
-                logoutBtn.classList.add('hidden');
-                userName.classList.add('hidden');
-                userAvatar.classList.add('hidden');
+                userProfilePill.classList.add('hidden');
+                userProfilePill.classList.remove('flex');
             }
         }
 
@@ -561,26 +579,32 @@
                 unsubscribeSnapshot = null;
             }
 
-            if (!user) {
+            if (!user || user.isAnonymous) {
                 userId = null;
-                jobs = [];
-                renderTable();
-                updateStats();
+                loadLocalJobs();
                 return;
             }
 
             userId = user.uid;
-            const jobsCollection = collection(db, 'artifacts', appId, 'users', userId, 'jobs');
+            const jobsCollection = collection(db, 'users', userId, 'jobs');
             
             unsubscribeSnapshot = onSnapshot(jobsCollection, (snapshot) => {
                 jobs = [];
-                snapshot.forEach((doc) => {
-                    jobs.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach((docSnap) => {
+                    jobs.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                // Simpan juga cadangannya ke lokal
+                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
                 renderTable();
                 updateStats();
             }, (error) => {
                 console.error("Error fetching data:", error);
+                // Jika Firestore Rules belum diatur, tetap gunakan penyimpanan lokal tanpa merusak aplikasi
+                if (error.code === 'permission-denied') {
+                    showToast("Mode Penyimpanan Lokal", "Akun Google aktif. Data disimpan di perangkat ini.", "warning", user.photoURL);
+                    userId = null;
+                    loadLocalJobs();
+                }
             });
         }
 
@@ -690,8 +714,8 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Edit Data"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>
+                                <button type="button" onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Edit Data"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </td>
                     `;
@@ -725,28 +749,34 @@
 
             if (userId && !isOfflineMode) {
                 try {
-                    const jobRef = doc(db, 'artifacts', appId, 'users', userId, 'jobs', finalJobId);
+                    const jobRef = doc(db, 'users', userId, 'jobs', finalJobId);
                     await setDoc(jobRef, newJob);
-                    showToast("Tersimpan!", "Data berhasil disimpan ke cloud.", "success");
+                    showToast("Tersimpan!", "Data berhasil disimpan ke akun Google Anda.", "success");
                 } catch (error) {
-                    showToast("Gagal", "Terjadi kesalahan saat menyimpan ke cloud.", "error");
+                    // Fallback simpan lokal jika rules Firestore belum dipublish
+                    saveJobLocally(formJobId, finalJobId, newJob);
                 }
             } else {
-                newJob.id = finalJobId;
-                if (formJobId) {
-                    const index = jobs.findIndex(j => j.id === formJobId);
-                    if (index !== -1) jobs[index] = { ...jobs[index], ...newJob };
-                } else {
-                    jobs.push(newJob);
-                }
-                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                renderTable(); updateStats();
-                showToast("Tersimpan!", "Data disimpan secara lokal.", "success");
+                saveJobLocally(formJobId, finalJobId, newJob);
             }
 
             submitBtn.innerText = originalText; submitBtn.disabled = false;
             window.closeModal();
         });
+
+        function saveJobLocally(formJobId, finalJobId, newJob) {
+            newJob.id = finalJobId;
+            if (formJobId) {
+                const index = jobs.findIndex(j => j.id === formJobId);
+                if (index !== -1) jobs[index] = { ...jobs[index], ...newJob };
+            } else {
+                jobs.push(newJob);
+            }
+            localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+            renderTable();
+            updateStats();
+            showToast("Tersimpan!", "Data lamaran berhasil disimpan.", "success");
+        }
 
         document.getElementById('confirm-btn').addEventListener('click', async () => {
             if (jobToDelete) {
@@ -756,17 +786,20 @@
 
                 if (userId && !isOfflineMode) {
                     try {
-                        const jobRef = doc(db, 'artifacts', appId, 'users', userId, 'jobs', jobToDelete);
+                        const jobRef = doc(db, 'users', userId, 'jobs', jobToDelete);
                         await deleteDoc(jobRef);
                         showToast("Terhapus!", "Data berhasil dihapus.", "success");
                     } catch (error) {
-                        showToast("Gagal", "Terjadi kesalahan saat menghapus data.", "error");
+                        jobs = jobs.filter(j => j.id !== jobToDelete);
+                        localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+                        renderTable(); updateStats();
+                        showToast("Terhapus!", "Data berhasil dihapus.", "success");
                     }
                 } else {
                     jobs = jobs.filter(j => j.id !== jobToDelete);
                     localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
                     renderTable(); updateStats();
-                    showToast("Terhapus!", "Data berhasil dihapus dari memori lokal.", "success");
+                    showToast("Terhapus!", "Data berhasil dihapus.", "success");
                 }
 
                 btn.innerText = origText; btn.disabled = false;
