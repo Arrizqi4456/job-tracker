@@ -4,29 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Application Tracker</title>
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     colors: {
-                        primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .excel-table th, .excel-table td {
+            border: 1px solid #e2e8f0;
+        }
+        .dark .excel-table th, .dark .excel-table td {
+            border: 1px solid #334155;
+        }
+        .excel-input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            padding: 8px 10px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+        .excel-input:focus {
+            background-color: #eff6ff;
+            box-shadow: inset 0 0 0 2px #2563eb;
+        }
+        .dark .excel-input:focus {
+            background-color: #1e293b;
+            box-shadow: inset 0 0 0 2px #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300 min-h-screen pb-20">
@@ -41,26 +90,32 @@
                     <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">JobTracker</span>
                 </div>
                 
-                <div class="flex items-center gap-3">
-                    <div id="auth-container" class="hidden items-center gap-2">
-                        <img id="user-avatar" src="" alt="User" class="w-8 h-8 rounded-full hidden border border-gray-200 dark:border-gray-600">
-                        <span id="user-name" class="text-sm font-medium hidden sm:block text-gray-700 dark:text-gray-300 max-w-[120px] truncate"></span>
-                        
-                        <button id="login-btn" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-2 shadow-sm">
-                            <i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login Google</span>
+                <div class="flex items-center gap-3 sm:gap-4 relative">
+                    <!-- Auth Container (Google Login & Profile Popup Trigger) -->
+                    <div id="auth-container" class="flex items-center gap-2 relative">
+                        <button id="login-btn" type="button" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-2 shadow-sm cursor-pointer">
+                            <i class="fa-brands fa-google text-red-500"></i> <span>Login Google</span>
                         </button>
-                        
-                        <button id="logout-btn" class="hidden text-gray-500 hover:text-red-600 dark:hover:text-red-400 p-2 rounded-lg transition-colors" title="Keluar Akun">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
+
+                        <!-- Logged-in User Pill -->
+                        <div id="user-profile-pill" class="hidden items-center gap-2 bg-gray-50 dark:bg-gray-700/60 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-600">
+                            <img id="user-avatar" src="" alt="User" class="w-7 h-7 rounded-full border border-primary-500 object-cover">
+                            <div class="hidden sm:flex flex-col text-left leading-tight">
+                                <span id="user-name" class="text-xs font-semibold text-gray-800 dark:text-gray-100 max-w-[120px] truncate"></span>
+                                <span id="user-email" class="text-[10px] text-gray-500 dark:text-gray-400 max-w-[120px] truncate"></span>
+                            </div>
+                            <button id="logout-btn" type="button" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-full transition-colors" title="Keluar Akun">
+                                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none">
+                    <button id="theme-toggle" type="button" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <i id="theme-icon" class="fa-solid fa-moon text-gray-600 dark:text-gray-300 text-lg"></i>
                     </button>
-                    <button onclick="openModal()" class="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center gap-2">
+                    <button type="button" onclick="openModal()" class="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Tambah Lamaran</span>
                     </button>
                 </div>
@@ -68,226 +123,345 @@
         </div>
     </nav>
 
-    <!-- Tab Navigation -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <div class="flex border-b border-gray-200 dark:border-gray-700">
-            <button id="tab-jobs-btn" onclick="window.switchTab('jobs')" class="py-2.5 px-4 font-semibold text-sm border-b-2 border-primary-600 text-primary-600 dark:text-primary-400 focus:outline-none transition-colors">
-                <i class="fa-solid fa-briefcase mr-2"></i>Daftar Lamaran Kerja
-            </button>
-            <button id="tab-links-btn" onclick="window.switchTab('links')" class="py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors">
-                <i class="fa-solid fa-link mr-2"></i>Catatan & Link Karir (Excel)
-            </button>
+    <div id="toast-notification" class="fixed top-20 right-4 sm:right-6 transform -translate-y-8 opacity-0 transition-all duration-300 z-50 rounded-xl shadow-xl max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pointer-events-none">
+        <div class="p-4 flex items-start gap-3">
+            <img id="toast-avatar" src="" alt="" class="w-9 h-9 rounded-full hidden border border-primary-500 flex-shrink-0">
+            <i id="toast-icon" class="fa-solid fa-circle-info text-blue-500 text-xl mt-0.5"></i>
+            <div class="flex-1 min-w-0">
+                <p id="toast-title" class="text-sm font-bold text-gray-900 dark:text-white truncate"></p>
+                <p id="toast-message" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-words"></p>
+            </div>
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- TAB 1: DAFTAR LAMARAN -->
-        <div id="tab-jobs-content">
-            <section class="mb-8">
-                <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ringkasan Lamaran</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-                        <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Dilamar</span>
-                        <span id="stat-total" class="text-3xl font-bold text-gray-900 dark:text-white mt-1">0</span>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-blue-100 dark:border-blue-900 flex flex-col">
-                        <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">Proses Interview</span>
-                        <span id="stat-interview" class="text-3xl font-bold text-blue-700 dark:text-blue-300 mt-1">0</span>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-green-100 dark:border-green-900 flex flex-col">
-                        <span class="text-sm text-green-600 dark:text-green-400 font-medium">Diterima</span>
-                        <span id="stat-offered" class="text-3xl font-bold text-green-700 dark:text-green-300 mt-1">0</span>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-100 dark:border-red-900 flex flex-col">
-                        <span class="text-sm text-red-600 dark:text-red-400 font-medium">Ditolak</span>
-                        <span id="stat-rejected" class="text-3xl font-bold text-red-700 dark:text-red-300 mt-1">0</span>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Daftar Lowongan</h2>
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <div class="relative w-full sm:w-64">
-                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="searchInput" placeholder="Cari posisi atau perusahaan..." class="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 dark:text-white w-full">
-                        </div>
-                        <div class="flex gap-2 w-full sm:w-auto flex-wrap">
-                            <select id="statusFilter" class="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm dark:text-white">
-                                <option value="">Semua Status</option>
-                                <option value="Disimpan">Disimpan</option>
-                                <option value="Dilamar">Dilamar / Terkirim</option>
-                                <option value="Interview HR">Interview HR</option>
-                                <option value="Interview User">Interview User</option>
-                                <option value="Tes Teknis">Tes Teknis</option>
-                                <option value="Diterima">Diterima</option>
-                                <option value="Ditolak">Ditolak</option>
-                            </select>
-                            <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> Export
-                            </button>
-                            <button onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm flex items-center gap-1">
-                                <i class="fa-solid fa-file-import"></i> Import
-                            </button>
-                            <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-700/50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase">Perusahaan & Posisi</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase">Tanggal</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase">Jadwal Selanjutnya</th>
-                                    <th class="px-6 py-3 text-right font-semibold text-gray-500 dark:text-gray-300 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="job-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                        </table>
-                    </div>
-                    <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
-                        <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-folder-open text-3xl text-gray-400"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Belum ada data</h3>
-                        <p class="text-gray-500 dark:text-gray-400 mt-1">Mulai melacak perjalanan karir Anda.</p>
-                        <button onclick="openModal()" class="mt-4 text-primary-600 font-medium">+ Tambah Lamaran Sekarang</button>
-                    </div>
-                </div>
-            </section>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
+            <div class="flex items-center gap-2">
+                <button type="button" id="tab-btn-jobs" onclick="switchTab('jobs')" class="px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Daftar Lamaran Kerja</span>
+                </button>
+                <button type="button" id="tab-btn-sheet" onclick="switchTab('sheet')" class="px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700">
+                    <i class="fa-solid fa-table text-green-600 dark:text-green-400"></i>
+                    <span>Catatan & Link Karir (Excel)</span>
+                    <span id="sheet-count-badge" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">0</span>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 hidden md:block">
+                <i class="fa-solid fa-cloud-arrow-up mr-1 text-primary-500"></i> Semua perubahan otomatis tersimpan
+            </p>
         </div>
 
-        <!-- TAB 2: CATATAN & LINK KARIR (EXCEL) -->
-        <div id="tab-links-content" class="hidden">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Daftar Catatan & Link Portofolio Karir</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Ketik langsung di tabel selayaknya Excel. Otomatis tersimpan!</p>
+        <!-- TAB 1: PELACAK LAMARAN KERJA -->
+        <div id="tab-content-jobs">
+        <section class="mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ringkasan Lamaran</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col transition-colors">
+                    <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Dilamar</span>
+                    <span id="stat-total" class="text-3xl font-bold text-gray-900 dark:text-white mt-1">0</span>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="addLinkRow()" class="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-1">
-                        <i class="fa-solid fa-plus"></i> Baris Baru
-                    </button>
-                    <button onclick="loadSampleLinks()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-2 rounded-lg text-sm font-medium">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Contoh Link
-                    </button>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-blue-100 dark:border-blue-900 flex flex-col transition-colors">
+                    <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">Proses Interview</span>
+                    <span id="stat-interview" class="text-3xl font-bold text-blue-700 dark:text-blue-300 mt-1">0</span>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-green-100 dark:border-green-900 flex flex-col transition-colors">
+                    <span class="text-sm text-green-600 dark:text-green-400 font-medium">Diterima</span>
+                    <span id="stat-offered" class="text-3xl font-bold text-green-700 dark:text-green-300 mt-1">0</span>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-100 dark:border-red-900 flex flex-col transition-colors">
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">Ditolak</span>
+                    <span id="stat-rejected" class="text-3xl font-bold text-red-700 dark:text-red-300 mt-1">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Daftar Lowongan</h2>
+                
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Cari posisi atau perusahaan..." class="pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white transition-colors w-full">
+                    </div>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <select id="statusFilter" class="py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white transition-colors w-full sm:w-auto cursor-pointer">
+                            <option value="">Semua Status</option>
+                            <option value="Disimpan">Disimpan</option>
+                            <option value="Dilamar">Dilamar / Terkirim</option>
+                            <option value="Interview HR">Interview HR</option>
+                            <option value="Interview User">Interview User</option>
+                            <option value="Tes Teknis">Tes Teknis</option>
+                            <option value="Diterima">Diterima</option>
+                            <option value="Ditolak">Ditolak</option>
+                        </select>
+                        <button type="button" onclick="exportToExcelCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Download tabel ke format Microsoft Excel (.csv)">
+                            <i class="fa-solid fa-file-csv"></i> <span class="hidden sm:inline">Excel (.CSV)</span>
+                        </button>
+                        <button type="button" onclick="exportToCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Simpan seluruh data Lamaran & Catatan Link">
+                            <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Backup Data</span>
+                        </button>
+                        <button type="button" onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Pulihkan data dari file Backup">
+                            <i class="fa-solid fa-file-import"></i> <span class="hidden sm:inline">Import</span>
+                        </button>
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-300 uppercase text-xs">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-3 py-3 w-12 text-center">No</th>
-                                <th class="px-4 py-3 text-left">Nama Portal / Perusahaan</th>
-                                <th class="px-4 py-3 text-left">Kategori</th>
-                                <th class="px-4 py-3 text-left">URL / Link Karir</th>
-                                <th class="px-4 py-3 text-left">Catatan Pribadi</th>
-                                <th class="px-3 py-3 text-right w-24">Aksi</th>
+                                <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Perusahaan & Posisi</th>
+                                <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
+                                <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jadwal Selanjutnya</th>
+                                <th scope="col" class="px-6 py-3 text-right font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="links-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                        <tbody id="job-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                            <!-- Data baris dari JS -->
+                        </tbody>
                     </table>
                 </div>
-                <div id="links-empty" class="hidden py-12 text-center text-gray-500 dark:text-gray-400">
-                    Belum ada catatan link. Klik tombol "Baris Baru" atau "Contoh Link" di atas.
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
+                    <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-folder-open text-3xl text-gray-400 dark:text-gray-500"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Belum ada data</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Mulai melacak perjalanan karir Anda dengan menambahkan data lamaran pertama Anda.</p>
+                    <button type="button" onclick="openModal()" class="mt-4 text-primary-600 hover:text-primary-700 font-medium">
+                        + Tambah Lamaran Sekarang
+                    </button>
+                </div>
+            </div>
+        </section>
+        </div>
+
+        <!-- TAB 2: CATATAN & LINK KARIR (MIRIP EXCEL) -->
+        <div id="tab-content-sheet" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 mb-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-green-600"></i>
+                            Spreadsheet Link Karir & Catatan Pribadi
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Klik langsung pada kotak sel di bawah untuk mengetik seperti di Excel. Ketikan Anda otomatis tersimpan!
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <div class="relative flex-1 sm:w-60">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="sheetSearchInput" placeholder="Cari portal, link, atau catatan..." class="pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-xs sm:text-sm focus:ring-2 focus:ring-green-500 outline-none dark:text-white w-full">
+                        </div>
+                        <button type="button" onclick="addSheetRow()" class="bg-green-600 hover:bg-green-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm shadow-sm transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> <span>Tambah Baris</span>
+                        </button>
+                        <button type="button" onclick="loadSampleLinks()" class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5" title="Masukkan contoh daftar link karir populer">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> <span>Isi Contoh Link</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Baris Tambah Cepat (Mirip Formula Bar Excel) -->
+                <form id="quick-sheet-form" class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-green-50/60 dark:bg-gray-700/40 p-3 rounded-lg border border-green-200 dark:border-gray-600 mb-4">
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-name" required placeholder="Nama Portal / Web Karir (mis: BUMN, Kalibrr)" class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <select id="quick-category" class="w-full px-2.5 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                            <option value="Job Portal">Job Portal</option>
+                            <option value="Web Karir Resmi">Web Karir Resmi</option>
+                            <option value="BUMN / CPNS">BUMN / CPNS</option>
+                            <option value="Remote / Freelance">Remote / Freelance</option>
+                            <option value="Catatan / Lainnya">Catatan / Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-url" placeholder="Link URL (mis: https://careers.google.com)" class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-notes" placeholder="Catatan pribadi / akun / jadwal cek..." class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-1 flex">
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm rounded py-1.5 px-2 transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-check"></i> <span class="sm:hidden">Simpan</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Tabel Spreadsheet Mirip Excel -->
+                <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-600">
+                    <table class="min-w-full excel-table border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <!-- Header Huruf Kolom ala Excel -->
+                            <tr class="bg-gray-200/80 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-[11px] font-mono select-none">
+                                <th class="w-10 py-1 text-center">#</th>
+                                <th class="py-1 text-center">A</th>
+                                <th class="py-1 text-center w-40">B</th>
+                                <th class="py-1 text-center">C</th>
+                                <th class="py-1 text-center">D</th>
+                                <th class="w-28 py-1 text-center">AKSI</th>
+                            </tr>
+                            <!-- Header Nama Kolom -->
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold">
+                                <th class="py-2.5 px-2 text-center bg-gray-100 dark:bg-gray-800">No</th>
+                                <th class="py-2.5 px-3 text-left min-w-[180px]">Nama Portal / Perusahaan</th>
+                                <th class="py-2.5 px-3 text-left min-w-[150px]">Kategori</th>
+                                <th class="py-2.5 px-3 text-left min-w-[240px]">Link Website Karir (URL)</th>
+                                <th class="py-2.5 px-3 text-left min-w-[260px]">Catatan Pribadi (Info Login / Ket.)</th>
+                                <th class="py-2.5 px-3 text-center">Buka / Hapus</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sheet-table-body" class="bg-white dark:bg-gray-800">
+                            <!-- Baris Excel dirender dari JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 flex flex-wrap justify-between items-center text-xs text-gray-500 dark:text-gray-400 gap-2">
+                    <span>💡 <b>Tips:</b> Klik sel mana saja untuk langsung mengedit isinya. Tekan ikon <i class="fa-solid fa-up-right-from-square text-blue-500 mx-0.5"></i> untuk langsung membuka web karir.</span>
+                    <button type="button" onclick="addSheetRow()" class="text-green-600 dark:text-green-400 hover:underline font-medium">+ Tambah baris kosong di bawah</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal Form Lamaran -->
-    <div id="form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div id="form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="closeModal()"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true" onclick="closeModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
             <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full border border-gray-200 dark:border-gray-700">
                 <form id="job-form">
                     <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">Tambah Lamaran Baru</h3>
-                        <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white" id="modal-title">Tambah Lamaran Baru</h3>
+                        <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
                     </div>
+                    
                     <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
                         <input type="hidden" id="job-id">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        
+                        <h4 class="text-sm font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-3">Informasi Utama (Wajib)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                             <div class="col-span-1 sm:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Perusahaan *</label>
-                                <input type="text" id="company" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="company" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Perusahaan <span class="text-red-500">*</span></label>
+                                <input type="text" id="company" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Posisi *</label>
-                                <input type="text" id="position" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Posisi / Job Title <span class="text-red-500">*</span></label>
+                                <input type="text" id="position" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Melamar *</label>
-                                <input type="date" id="dateApplied" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="dateApplied" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Melamar <span class="text-red-500">*</span></label>
+                                <input type="date" id="dateApplied" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status *</label>
-                                <select id="status" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Lamaran <span class="text-red-500">*</span></label>
+                                <select id="status" required class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                                     <option value="Disimpan">Disimpan</option>
                                     <option value="Dilamar" selected>Dilamar / Terkirim</option>
                                     <option value="Interview HR">Interview HR</option>
                                     <option value="Interview User">Interview User</option>
                                     <option value="Tes Teknis">Tes Teknis</option>
-                                    <option value="Diterima">Diterima</option>
+                                    <option value="Diterima">Ditawarkan / Diterima</option>
                                     <option value="Ditolak">Ditolak</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tautan / URL Lowongan</label>
-                                <input type="url" id="jobUrl" placeholder="https://..." class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="jobUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tautan / URL Lowongan</label>
+                                <input type="url" id="jobUrl" placeholder="https://..." class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">Informasi Tambahan (Opsional)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="source" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber Platform</label>
+                                <input type="text" id="source" placeholder="LinkedIn, JobStreet, dll" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber Platform</label>
-                                <input type="text" id="source" placeholder="LinkedIn, JobStreet, dll" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="pic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kontak Recruiter</label>
+                                <input type="text" id="pic" placeholder="Nama/Email" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jadwal Lanjutan</label>
-                                <input type="date" id="nextSchedule" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="nextSchedule" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jadwal Lanjutan</label>
+                                <input type="date" id="nextSchedule" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Range Gaji</label>
-                                <input type="text" id="salary" placeholder="Rp..." class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                <label for="salary" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Range Gaji</label>
+                                <input type="text" id="salary" placeholder="Rp..." class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none">
                             </div>
                             <div class="col-span-1 sm:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan</label>
-                                <textarea id="notes" rows="2" class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white outline-none"></textarea>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan</label>
+                                <textarea id="notes" rows="3" placeholder="Persiapan interview, requirements, dll." class="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none"></textarea>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 rounded-b-xl flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-medium bg-white dark:bg-gray-800 border rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg shadow-sm">Simpan Data</button>
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">Batal</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none shadow-sm">Simpan Data</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast-notification" class="fixed top-20 right-6 transform translate-y-[-20px] opacity-0 transition-all duration-300 z-50 rounded-lg shadow-lg max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 pointer-events-none">
-        <div class="p-4 flex items-start gap-3">
-            <i id="toast-icon" class="fa-solid fa-circle-info text-blue-500 text-lg mt-0.5"></i>
-            <div>
-                <p id="toast-title" class="text-sm font-semibold text-gray-900 dark:text-white"></p>
-                <p id="toast-message" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-5">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="confirm-title">Hapus Data?</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Apakah Anda yakin ingin menghapus data lamaran ini? Tindakan ini tidak dapat dibatalkan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 rounded-b-xl flex justify-end gap-3">
+                    <button type="button" onclick="window.closeConfirmModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">Batal</button>
+                    <button type="button" id="confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none shadow-sm">Hapus</button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Error Debug Panel (Sistem Deteksi Error Otomatis) -->
+    <div id="debug-panel" class="hidden fixed top-20 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-2xl z-50">
+        <div class="flex justify-between items-start">
+            <div class="flex-1">
+                <h3 class="text-red-800 font-bold text-lg mb-1"><i class="fa-solid fa-bug mr-2"></i>Sistem Mendeteksi Kendala</h3>
+                <p id="debug-message" class="text-xs text-red-600 font-mono break-all mb-2"></p>
+                <div id="debug-solution" class="text-xs text-gray-800 mt-2 font-medium bg-white p-3 rounded border border-red-200"></div>
+            </div>
+            <button type="button" onclick="document.getElementById('debug-panel').classList.add('hidden')" class="text-gray-400 hover:text-red-500 ml-4"><i class="fa-solid fa-times text-xl"></i></button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // KONFIGURASI FIREBASE ASLI MILIK ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyD_vmv82okTt_Clpkgd9oPA1hlrGitWDuo",
             authDomain: "job-tracker-d664b.firebaseapp.com",
@@ -298,394 +472,99 @@
             measurementId: "G-0TBKWBW3HR"
         };
         
-        const appId = firebaseConfig.projectId;
+        const appId = firebaseConfig.projectId; 
+
         let app, db, auth;
         let isOfflineMode = false;
 
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch(e) { isOfflineMode = true; }
-
+        // --- State Management ---
         let jobs = [];
-        let links = [];
+        let careerLinks = [];
+        let jobToDelete = null;
         let userId = null;
         let unsubscribeSnapshot = null;
+        let unsubscribeLinksSnapshot = null;
 
-        // TAB SWITCHER
-        window.switchTab = function(tabName) {
-            const jobsBtn = document.getElementById('tab-jobs-btn');
-            const linksBtn = document.getElementById('tab-links-btn');
-            const jobsContent = document.getElementById('tab-jobs-content');
-            const linksContent = document.getElementById('tab-links-content');
+        // --- DOM Elements ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+        
+        const formModal = document.getElementById('form-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        const jobForm = document.getElementById('job-form');
+        const jobTableBody = document.getElementById('job-table-body');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
 
-            if (tabName === 'jobs') {
-                jobsBtn.className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-primary-600 text-primary-600 dark:text-primary-400 focus:outline-none transition-colors";
-                linksBtn.className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors";
-                jobsContent.classList.remove('hidden');
-                linksContent.classList.add('hidden');
-            } else {
-                linksBtn.className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-primary-600 text-primary-600 dark:text-primary-400 focus:outline-none transition-colors";
-                jobsBtn.className = "py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors";
-                linksContent.classList.remove('hidden');
-                jobsContent.classList.add('hidden');
-                renderLinksTable();
-            }
-        };
-
-        window.showToast = function(title, message, type = "info") {
+        window.showToast = function(title, message, type = "info", avatarUrl = null) {
             const toast = document.getElementById('toast-notification');
             const toastIcon = document.getElementById('toast-icon');
+            const toastAvatar = document.getElementById('toast-avatar');
+            
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-message').innerText = message;
             
-            toastIcon.className = "fa-solid text-lg mt-0.5 ";
-            if(type === 'success') toastIcon.className += "fa-circle-check text-green-500";
-            else if(type === 'error') toastIcon.className += "fa-circle-xmark text-red-500";
-            else if(type === 'warning') toastIcon.className += "fa-triangle-exclamation text-yellow-500";
-            else toastIcon.className += "fa-circle-info text-blue-500";
+            if (avatarUrl) {
+                toastAvatar.src = avatarUrl;
+                toastAvatar.classList.remove('hidden');
+                toastIcon.classList.add('hidden');
+            } else {
+                toastAvatar.classList.add('hidden');
+                toastIcon.className = "fa-solid text-xl mt-0.5 ";
+                if(type === 'success') toastIcon.className += "fa-circle-check text-green-500";
+                else if(type === 'error') toastIcon.className += "fa-circle-xmark text-red-500";
+                else if(type === 'warning') toastIcon.className += "fa-triangle-exclamation text-yellow-500";
+                else toastIcon.className += "fa-circle-info text-blue-500";
+            }
 
-            toast.classList.remove('translate-y-[-20px]', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-[-20px]', 'opacity-0'); }, 4000);
+            toast.classList.remove('-translate-y-8', 'opacity-0');
+            setTimeout(() => { toast.classList.add('-translate-y-8', 'opacity-0'); }, 4500);
         };
 
+        function handleAuthError(error) {
+            let solution = "Terjadi kesalahan sistem. Cek koneksi internet Anda.";
+            
+            if (error.code === 'auth/api-key-not-valid') {
+                solution = "API Key tidak valid. Pastikan API Key di dalam firebaseConfig sudah sesuai dengan Firebase Console.";
+            } else if (error.code === 'auth/unauthorized-domain') {
+                solution = "Domain belum diotorisasi. Tambahkan domain website Anda ke menu Authentication > Settings > Authorized Domains di Firebase Console.";
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                showToast("Login Dibatalkan", "Jendela pilih akun Google ditutup sebelum selesai.", "warning");
+                updateAuthUI(auth ? auth.currentUser : null);
+                return;
+            } else if (error.code === 'permission-denied') {
+                solution = "Database Firestore masih terkunci. Buka Firebase Console > Firestore Database > tab Rules (Aturan), ubah menjadi 'allow read, write: if request.auth != null;' lalu klik Publish.";
+            }
+            
+            document.getElementById('debug-panel').classList.remove('hidden');
+            document.getElementById('debug-message').innerText = `Kode: ${error.code || 'Error'} | ${error.message}`;
+            document.getElementById('debug-solution').innerHTML = `<b>💡 SOLUSI:</b><br>${solution}`;
+            
+            console.error("Firebase Error:", error);
+            updateAuthUI(auth ? auth.currentUser : null);
+        }
+
         window.openModal = function() {
-            document.getElementById('job-form').reset();
+            jobForm.reset();
             document.getElementById('job-id').value = '';
             document.getElementById('modal-title').innerText = 'Tambah Lamaran Baru';
             document.getElementById('dateApplied').valueAsDate = new Date();
-            document.getElementById('form-modal').classList.remove('hidden');
+            
+            formModal.classList.remove('hidden');
+            setTimeout(() => formModal.querySelector('.transform').classList.remove('scale-95', 'opacity-0'), 10);
         };
 
         window.closeModal = function() {
-            document.getElementById('form-modal').classList.add('hidden');
+            formModal.querySelector('.transform').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => formModal.classList.add('hidden'), 200); 
         };
-
-        // INISIALISASI CLOUD & AUTH
-        async function initCloud() {
-            if (isOfflineMode || !auth) { runLocalMode(); return; }
-
-            try {
-                const redirectResult = await getRedirectResult(auth);
-                if (redirectResult) showToast("Berhasil Masuk", "Data tersinkronisasi.", "success");
-            } catch (error) { console.error(error); }
-
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                runLocalMode(); return;
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                updateAuthUI(user);
-                setupDataListener(user);
-            });
-            
-            const googleProvider = new GoogleAuthProvider();
-            document.getElementById('login-btn').addEventListener('click', () => {
-                signInWithRedirect(auth, googleProvider);
-            });
-
-            document.getElementById('logout-btn').addEventListener('click', async () => {
-                await signOut(auth);
-                showToast("Logout Berhasil", "Kembali sebagai tamu.", "info");
-                await signInAnonymously(auth);
-            });
-        }
-
-        function runLocalMode() {
-            const stored = localStorage.getItem('jobTrackerData_v1');
-            if (stored) {
-                const rawJobs = JSON.parse(stored);
-                // Bersihkan duplikat berdasarkan kesamaan company & position
-                const uniqueMap = new Map();
-                rawJobs.forEach(j => {
-                    const key = (j.company + "_" + j.position).toLowerCase().trim();
-                    if (!uniqueMap.has(key)) uniqueMap.set(key, j);
-                });
-                jobs = Array.from(uniqueMap.values());
-            }
-            const storedLinks = localStorage.getItem('jobTrackerLinks_v1');
-            if (storedLinks) links = JSON.parse(storedLinks);
-
-            renderTable(); updateStats();
-            document.getElementById('auth-container').classList.remove('hidden');
-            document.getElementById('auth-container').classList.add('flex');
-        }
-
-        function updateAuthUI(user) {
-            const loginBtn = document.getElementById('login-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            const userName = document.getElementById('user-name');
-            const userAvatar = document.getElementById('user-avatar');
-            const authContainer = document.getElementById('auth-container');
-            
-            authContainer.classList.remove('hidden');
-            authContainer.classList.add('flex');
-
-            if (user && !user.isAnonymous) {
-                loginBtn.classList.add('hidden');
-                logoutBtn.classList.remove('hidden');
-                userName.innerText = user.displayName || 'Pengguna';
-                userName.classList.remove('hidden');
-                if (user.photoURL) { userAvatar.src = user.photoURL; userAvatar.classList.remove('hidden'); }
-            } else {
-                loginBtn.classList.remove('hidden');
-                logoutBtn.classList.add('hidden');
-                userName.classList.add('hidden');
-                userAvatar.classList.add('hidden');
-            }
-        }
-
-        function setupDataListener(user) {
-            if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
-            if (!user) { userId = null; jobs = []; links = []; renderTable(); updateStats(); return; }
-
-            userId = user.uid;
-            const jobsRef = collection(db, 'artifacts', appId, 'users', userId, 'jobs');
-            const linksRef = collection(db, 'artifacts', appId, 'users', userId, 'links');
-            
-            onSnapshot(jobsRef, (snapshot) => {
-                const rawJobs = [];
-                snapshot.forEach((doc) => { rawJobs.push({ id: doc.id, ...doc.data() }); });
-                
-                // BERSIHKAN DUPLIKAT OTOMATIS
-                const uniqueMap = new Map();
-                rawJobs.forEach(j => {
-                    const key = (j.company + "_" + j.position).toLowerCase().trim();
-                    if (!uniqueMap.has(key)) uniqueMap.set(key, j);
-                });
-                jobs = Array.from(uniqueMap.values());
-
-                renderTable(); updateStats();
-            });
-
-            onSnapshot(linksRef, (snapshot) => {
-                links = [];
-                snapshot.forEach((doc) => { links.push({ id: doc.id, ...doc.data() }); });
-                if (window.location.hash === '#links') renderLinksTable();
-            });
-        }
-
-        // TABEL & STATISTIK
-        function updateStats() {
-            document.getElementById('stat-total').innerText = jobs.length;
-            const interviewStatuses = ['Interview HR', 'Interview User', 'Tes Teknis'];
-            document.getElementById('stat-interview').innerText = jobs.filter(j => interviewStatuses.includes(j.status)).length;
-            document.getElementById('stat-offered').innerText = jobs.filter(j => j.status === 'Diterima').length;
-            document.getElementById('stat-rejected').innerText = jobs.filter(j => j.status === 'Ditolak').length;
-        }
-
-        function getStatusBadge(status, jobId) {
-            const statuses = ['Disimpan', 'Dilamar', 'Interview HR', 'Interview User', 'Tes Teknis', 'Diterima', 'Ditolak'];
-            let optionsHtml = statuses.map(s => `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('');
-            return `<select onchange="updateJobStatus('${jobId}', this.value)" class="text-xs font-semibold rounded-full px-2 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white cursor-pointer outline-none">${optionsHtml}</select>`;
-        }
-
-        window.updateJobStatus = async function(id, newStatus) {
-            const job = jobs.find(j => j.id === id);
-            if (!job) return;
-            job.status = newStatus;
-            
-            if (userId && !isOfflineMode) {
-                try {
-                    const jobRef = doc(db, 'artifacts', appId, 'users', userId, 'jobs', id);
-                    await setDoc(jobRef, job, { merge: true });
-                    showToast("Status Diperbarui", "Perubahan status tersimpan.", "success");
-                } catch(e) { showToast("Gagal", "Error update status", "error"); }
-            } else {
-                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                renderTable(); updateStats();
-                showToast("Status Diperbarui", "Tersimpan secara lokal.", "success");
-            }
-        };
-
-        function renderTable() {
-            const tbody = document.getElementById('job-table-body');
-            tbody.innerHTML = '';
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filterValue = document.getElementById('statusFilter').value;
-            let displayJobs = [...jobs].sort((a, b) => new Date(b.dateApplied) - new Date(a.dateApplied));
-
-            if (searchTerm) displayJobs = displayJobs.filter(j => j.company.toLowerCase().includes(searchTerm) || j.position.toLowerCase().includes(searchTerm));
-            if (filterValue) displayJobs = displayJobs.filter(j => j.status === filterValue);
-
-            if (displayJobs.length === 0) {
-                tbody.parentElement.parentElement.classList.add('hidden');
-                document.getElementById('empty-state').classList.remove('hidden');
-                document.getElementById('empty-state').classList.add('flex');
-            } else {
-                tbody.parentElement.parentElement.classList.remove('hidden');
-                document.getElementById('empty-state').classList.add('hidden');
-                document.getElementById('empty-state').classList.remove('flex');
-
-                displayJobs.forEach(job => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group";
-                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-1"><i class="fa-solid fa-external-link-alt text-xs"></i></a>` : '';
-                    
-                    let scheduleBadge = '<span class="text-gray-400">-</span>';
-                    if (job.nextSchedule) {
-                        const today = new Date().toISOString().split('T')[0];
-                        if (job.nextSchedule === today) scheduleBadge = `<span class="text-red-600 dark:text-red-400 font-bold animate-pulse text-xs bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">HARI INI!</span>`;
-                        else scheduleBadge = `<span class="text-xs text-primary-600 dark:text-primary-400 font-medium">${job.nextSchedule}</span>`;
-                    }
-
-                    tr.innerHTML = `
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-gray-900 dark:text-white flex items-center">${job.position} ${urlLink}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-regular fa-building mr-1"></i>${job.company}</span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    ${job.source ? `<span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded"><i class="fa-solid fa-globe mr-1"></i>${job.source}</span>` : ''}
-                                    ${job.salary ? `<span class="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded"><i class="fa-solid fa-money-bill mr-1"></i>${job.salary}</span>` : ''}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-gray-500 dark:text-gray-300">${job.dateApplied}</td>
-                        <td class="px-6 py-4">${getStatusBadge(job.status, job.id)}</td>
-                        <td class="px-6 py-4">${scheduleBadge}</td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-1">
-                                <button onclick="editJob('${job.id}')" class="text-blue-600 hover:text-blue-800 p-2"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="deleteJob('${job.id}')" class="text-red-600 hover:text-red-800 p-2"><i class="fa-solid fa-trash text-xs"></i></button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        // TABEL LINK KARIR (EXCEL)
-        window.renderLinksTable = function() {
-            const tbody = document.getElementById('links-table-body');
-            const emptyEl = document.getElementById('links-empty');
-            tbody.innerHTML = '';
-
-            if (links.length === 0) {
-                tbody.parentElement.parentElement.classList.add('hidden');
-                emptyEl.classList.remove('hidden');
-                return;
-            }
-            tbody.parentElement.parentElement.classList.remove('hidden');
-            emptyEl.classList.add('hidden');
-
-            links.forEach((link, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-3 py-2 text-center text-gray-400 text-xs">${idx + 1}</td>
-                    <td class="px-4 py-2"><input type="text" value="${link.company || ''}" onchange="updateLinkRow('${link.id}', 'company', this.value)" placeholder="Nama Perusahaan/Portal..." class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 outline-none text-sm dark:text-white"></td>
-                    <td class="px-4 py-2"><input type="text" value="${link.category || ''}" onchange="updateLinkRow('${link.id}', 'category', this.value)" placeholder="Kategori..." class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 outline-none text-sm dark:text-white"></td>
-                    <td class="px-4 py-2"><input type="url" value="${link.url || ''}" onchange="updateLinkRow('${link.id}', 'url', this.value)" placeholder="https://..." class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 outline-none text-sm dark:text-white text-blue-600"></td>
-                    <td class="px-4 py-2"><input type="text" value="${link.notes || ''}" onchange="updateLinkRow('${link.id}', 'notes', this.value)" placeholder="Catatan..." class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 outline-none text-sm dark:text-white"></td>
-                    <td class="px-3 py-2 text-right">
-                        <div class="flex items-center justify-end gap-1">
-                            ${link.url ? `<a href="${link.url}" target="_blank" class="text-blue-600 hover:text-blue-800 p-1.5" title="Buka Link"><i class="fa-solid fa-external-link text-xs"></i></a>` : ''}
-                            <button onclick="convertToJob('${link.id}')" class="text-green-600 hover:text-green-800 p-1.5" title="Jadikan Lamaran Kerja"><i class="fa-solid fa-briefcase text-xs"></i></button>
-                            <button onclick="deleteLinkRow('${link.id}')" class="text-red-600 hover:text-red-800 p-1.5" title="Hapus"><i class="fa-solid fa-trash text-xs"></i></button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        window.addLinkRow = async function() {
-            const newLink = { id: Date.now().toString(36), company: '', category: 'Portal Karir', url: '', notes: '' };
-            links.push(newLink);
-            renderLinksTable();
-            if (userId && !isOfflineMode) {
-                await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'links', newLink.id), newLink);
-            } else {
-                localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(links));
-            }
-        };
-
-        window.updateLinkRow = async function(id, field, val) {
-            const item = links.find(l => l.id === id);
-            if (item) {
-                item[field] = val;
-                if (userId && !isOfflineMode) {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'links', id), item, { merge: true });
-                } else {
-                    localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(links));
-                }
-            }
-        };
-
-        window.deleteLinkRow = async function(id) {
-            links = links.filter(l => l.id !== id);
-            renderLinksTable();
-            if (userId && !isOfflineMode) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'links', id));
-            } else {
-                localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(links));
-            }
-        };
-
-        window.loadSampleLinks = function() {
-            const samples = [
-                { id: 'l1', company: 'LinkedIn Jobs', category: 'Platform Utama', url: 'https://www.linkedin.com/jobs', notes: 'Cek rutin setiap pagi' },
-                { id: 'l2', company: 'JobStreet Indonesia', category: 'Portal Lowongan', url: 'https://www.jobstreet.co.id', notes: 'Filter area Surabaya' },
-                { id: 'l3', company: 'Karir BUMN', category: 'BUMN', url: 'https://recruitment.bumn.id', notes: 'Pantau rekrutmen bersama' }
-            ];
-            samples.forEach(s => { if (!links.some(l => l.company === s.company)) links.push(s); });
-            renderLinksTable();
-            showToast("Contoh Ditambahkan", "Link portofolio dimuat.", "success");
-        };
-
-        window.convertToJob = function(id) {
-            const link = links.find(l => l.id === id);
-            if (!link) return;
-            openModal();
-            document.getElementById('company').value = link.company;
-            document.getElementById('jobUrl').value = link.url;
-            document.getElementById('notes').value = link.notes;
-            window.switchTab('jobs');
-            showToast("Dialihkan", "Lengkapi detail lalu simpan sebagai lamaran.", "info");
-        };
-
-        // FORM LAMARAN SIMPAN & HAPUS
-        document.getElementById('job-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formId = document.getElementById('job-id').value;
-            const jobId = formId || Date.now().toString(36);
-            
-            const jobData = {
-                id: jobId,
-                company: document.getElementById('company').value,
-                position: document.getElementById('position').value,
-                dateApplied: document.getElementById('dateApplied').value,
-                status: document.getElementById('status').value,
-                jobUrl: document.getElementById('jobUrl').value,
-                source: document.getElementById('source').value,
-                nextSchedule: document.getElementById('nextSchedule').value,
-                salary: document.getElementById('salary').value,
-                notes: document.getElementById('notes').value
-            };
-
-            if (userId && !isOfflineMode) {
-                await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'jobs', jobId), jobData);
-            } else {
-                if (formId) {
-                    const idx = jobs.findIndex(j => j.id === formId);
-                    if (idx !== -1) jobs[idx] = jobData;
-                } else {
-                    jobs.push(jobData);
-                }
-                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                renderTable(); updateStats();
-            }
-            closeModal();
-            showToast("Tersimpan!", "Data lamaran berhasil disimpan.", "success");
-        });
 
         window.editJob = function(id) {
             const job = jobs.find(j => j.id === id);
             if (!job) return;
+
             document.getElementById('modal-title').innerText = 'Edit Lamaran';
             document.getElementById('job-id').value = job.id;
             document.getElementById('company').value = job.company || '';
@@ -694,86 +573,843 @@
             document.getElementById('status').value = job.status || 'Dilamar';
             document.getElementById('jobUrl').value = job.jobUrl || '';
             document.getElementById('source').value = job.source || '';
+            document.getElementById('pic').value = job.pic || '';
             document.getElementById('nextSchedule').value = job.nextSchedule || '';
             document.getElementById('salary').value = job.salary || '';
             document.getElementById('notes').value = job.notes || '';
-            document.getElementById('form-modal').classList.remove('hidden');
+
+            formModal.classList.remove('hidden');
+            setTimeout(() => formModal.querySelector('.transform').classList.remove('scale-95', 'opacity-0'), 10);
         };
 
-        window.deleteJob = async function(id) {
-            if (confirm("Hapus data lamaran ini?")) {
-                if (userId && !isOfflineMode) {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'jobs', id));
-                } else {
-                    jobs = jobs.filter(j => j.id !== id);
-                    localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                    renderTable(); updateStats();
-                }
-                showToast("Terhapus", "Data berhasil dihapus.", "success");
+        window.confirmDelete = function(id) {
+            jobToDelete = id;
+            confirmModal.classList.remove('hidden');
+        };
+
+        window.closeConfirmModal = function() {
+            jobToDelete = null;
+            confirmModal.classList.add('hidden');
+        };
+
+        // --- GLOBAL SCOPE SWITCH TAB FUNCTION ---
+        window.switchTab = function(tabName) {
+            const jobsContent = document.getElementById('tab-content-jobs');
+            const sheetContent = document.getElementById('tab-content-sheet');
+            const btnJobs = document.getElementById('tab-btn-jobs');
+            const btnSheet = document.getElementById('tab-btn-sheet');
+
+            if (!jobsContent || !sheetContent) return;
+
+            if (tabName === 'sheet') {
+                jobsContent.classList.add('hidden');
+                sheetContent.classList.remove('hidden');
+                if (btnSheet) btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-green-600 text-white shadow-sm";
+                if (btnJobs) btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
+                renderSheetTable();
+            } else {
+                sheetContent.classList.add('hidden');
+                jobsContent.classList.remove('hidden');
+                if (btnJobs) btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm";
+                if (btnSheet) btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
             }
         };
 
-        window.exportToCSV = function() {
-            if (jobs.length === 0) return showToast("Kosong", "Tidak ada data untuk diexport.", "warning");
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ jobs, links }));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `Backup_JobTracker_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(dlAnchor); dlAnchor.click(); dlAnchor.remove();
-            showToast("Backup Berhasil", "File cadangan diunduh.", "success");
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch(e) { 
+            console.error("Firebase init error", e); 
+            isOfflineMode = true; 
+        }
+
+        async function initCloud() {
+            loadLocalJobs();
+
+            if (isOfflineMode || !auth) {
+                return;
+            }
+
+            const googleProvider = new GoogleAuthProvider();
+            googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async () => {
+                    loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-primary-600"></i> <span>Membuka Google...</span>';
+                    loginBtn.disabled = true;
+                    try {
+                        const result = await signInWithPopup(auth, googleProvider);
+                        if (result && result.user) {
+                            showToast(
+                                `Halo, ${result.user.displayName || 'Pengguna'}!`,
+                                `Berhasil masuk dengan ${result.user.email}`,
+                                "success",
+                                result.user.photoURL
+                            );
+                        }
+                    } catch (error) {
+                        if (error.code === 'auth/popup-blocked') {
+                            showToast("Mengalihkan...", "Membuka halaman login Google...", "info");
+                            signInWithRedirect(auth, googleProvider);
+                            return;
+                        }
+                        handleAuthError(error);
+                    } finally {
+                        loginBtn.disabled = false;
+                        updateAuthUI(auth.currentUser);
+                    }
+                });
+            }
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        showToast("Logout Berhasil", "Anda telah keluar dari akun Google.", "info");
+                    } catch(e) {
+                        showToast("Gagal Logout", e.message, "error");
+                    }
+                });
+            }
+
+            try {
+                const redirectResult = await getRedirectResult(auth);
+                if (redirectResult && redirectResult.user) {
+                    showToast(
+                        `Halo, ${redirectResult.user.displayName || 'Pengguna'}!`,
+                        `Berhasil masuk dengan ${redirectResult.user.email}`,
+                        "success",
+                        redirectResult.user.photoURL
+                    );
+                }
+            } catch (error) {
+                handleAuthError(error);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                updateAuthUI(user);
+                setupDataListener(user);
+            });
+        }
+
+        function loadLocalJobs() {
+            const storedData = localStorage.getItem('jobTrackerData_v1');
+            if (storedData) {
+                try {
+                    jobs = JSON.parse(storedData);
+                } catch (e) {
+                    jobs = [];
+                }
+            }
+            const storedLinks = localStorage.getItem('jobTrackerLinks_v1');
+            if (storedLinks) {
+                try {
+                    careerLinks = JSON.parse(storedLinks);
+                } catch (e) {
+                    careerLinks = [];
+                }
+            }
+            renderTable();
+            updateStats();
+            renderSheetTable();
+        }
+
+        function updateAuthUI(user) {
+            const loginBtn = document.getElementById('login-btn');
+            const userProfilePill = document.getElementById('user-profile-pill');
+            const userName = document.getElementById('user-name');
+            const userEmail = document.getElementById('user-email');
+            const userAvatar = document.getElementById('user-avatar');
+
+            if (!loginBtn) return;
+            loginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span>Login Google</span>';
+
+            if (user && !user.isAnonymous) {
+                loginBtn.classList.add('hidden');
+                if (userProfilePill) {
+                    userProfilePill.classList.remove('hidden');
+                    userProfilePill.classList.add('flex');
+                }
+                if (userName) userName.innerText = user.displayName || 'Pengguna';
+                if (userEmail) userEmail.innerText = user.email || 'Tersinkronisasi';
+                if (userAvatar) userAvatar.src = user.photoURL || 'https://placehold.co/64x64/2563eb/ffffff?text=U';
+            } else {
+                loginBtn.classList.remove('hidden');
+                if (userProfilePill) {
+                    userProfilePill.classList.add('hidden');
+                    userProfilePill.classList.remove('flex');
+                }
+            }
+        }
+
+        function setupDataListener(user) {
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot();
+                unsubscribeSnapshot = null;
+            }
+            if (unsubscribeLinksSnapshot) {
+                unsubscribeLinksSnapshot();
+                unsubscribeLinksSnapshot = null;
+            }
+
+            if (!user || user.isAnonymous) {
+                userId = null;
+                loadLocalJobs();
+                return;
+            }
+
+            userId = user.uid;
+            const jobsCollection = collection(db, 'users', userId, 'jobs');
+            
+            const localJobsBackup = [...jobs];
+            let initialJobsSynced = false;
+
+            unsubscribeSnapshot = onSnapshot(jobsCollection, async (snapshot) => {
+                const cloudIds = new Set();
+                const fetchedJobs = [];
+                snapshot.forEach((docSnap) => {
+                    cloudIds.add(docSnap.id);
+                    fetchedJobs.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                if (!initialJobsSynced && localJobsBackup.length > 0) {
+                    initialJobsSynced = true;
+                    for (const localJob of localJobsBackup) {
+                        if (localJob.id && !cloudIds.has(localJob.id)) {
+                            try {
+                                await setDoc(doc(db, 'users', userId, 'jobs', localJob.id), localJob);
+                                fetchedJobs.push(localJob);
+                            } catch (e) {
+                                console.warn("Sync job skip:", e);
+                            }
+                        }
+                    }
+                }
+
+                jobs = fetchedJobs;
+                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+                renderTable();
+                updateStats();
+            }, (error) => {
+                console.error("Error fetching data:", error);
+                if (error.code === 'permission-denied') {
+                    showToast("Mode Penyimpanan Lokal", "Akun Google aktif. Data disimpan di perangkat ini.", "warning", user.photoURL);
+                    userId = null;
+                    loadLocalJobs();
+                }
+            });
+
+            const localLinksBackup = [...careerLinks];
+            let initialLinksSynced = false;
+
+            const linksCollection = collection(db, 'users', userId, 'career_links');
+            unsubscribeLinksSnapshot = onSnapshot(linksCollection, async (snapshot) => {
+                const cloudLinkIds = new Set();
+                const fetchedLinks = [];
+                snapshot.forEach((docSnap) => {
+                    cloudLinkIds.add(docSnap.id);
+                    fetchedLinks.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                if (!initialLinksSynced && localLinksBackup.length > 0) {
+                    initialLinksSynced = true;
+                    for (const localLink of localLinksBackup) {
+                        if (localLink.id && !cloudLinkIds.has(localLink.id)) {
+                            try {
+                                await setDoc(doc(db, 'users', userId, 'career_links', localLink.id), localLink);
+                                fetchedLinks.push(localLink);
+                            } catch (e) {
+                                console.warn("Sync link skip:", e);
+                            }
+                        }
+                    }
+                }
+
+                careerLinks = fetchedLinks;
+                careerLinks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+                renderSheetTable();
+            }, (error) => {
+                console.warn("Links local fallback:", error.code);
+            });
+        }
+
+        async function saveSheetItem(item) {
+            localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+            const badge = document.getElementById('sheet-count-badge');
+            if (badge) badge.innerText = careerLinks.length;
+            if (userId && !isOfflineMode) {
+                try {
+                    const linkRef = doc(db, 'users', userId, 'career_links', item.id);
+                    await setDoc(linkRef, item);
+                } catch (e) {
+                    console.warn("Saved locally:", e);
+                }
+            }
+        }
+
+        window.addSheetRow = function(customData = null) {
+            const newItem = customData || {
+                id: generateId(),
+                name: '',
+                category: 'Web Karir Resmi',
+                url: '',
+                notes: '',
+                createdAt: Date.now()
+            };
+            careerLinks.push(newItem);
+            saveSheetItem(newItem);
+            renderSheetTable();
         };
 
-        window.importData = function(e) {
-            const file = e.target.files[0];
+        window.updateSheetCell = function(id, field, value) {
+            const idx = careerLinks.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                careerLinks[idx][field] = value;
+                saveSheetItem(careerLinks[idx]);
+            }
+        };
+
+        window.deleteSheetRow = async function(id) {
+            careerLinks = careerLinks.filter(item => item.id !== id);
+            localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+            renderSheetTable();
+            if (userId && !isOfflineMode) {
+                try {
+                    await deleteDoc(doc(db, 'users', userId, 'career_links', id));
+                } catch (e) {
+                    console.warn("Deleted locally:", e);
+                }
+            }
+            showToast("Baris Dihapus", "Baris catatan karir telah dihapus.", "info");
+        };
+
+        window.openCareerUrl = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item || !item.url || !item.url.trim()) {
+                showToast("Link Kosong", "Silakan isi kolom Link Website Karir terlebih dahulu.", "warning");
+                return;
+            }
+            let targetUrl = item.url.trim();
+            if (!/^https?:\/\//i.test(targetUrl)) {
+                targetUrl = 'https://' + targetUrl;
+            }
+            window.open(targetUrl, '_blank');
+        };
+
+        window.copyCareerUrl = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item || !item.url) {
+                showToast("Link Kosong", "Tidak ada link untuk disalin.", "warning");
+                return;
+            }
+            const tempInput = document.createElement('input');
+            tempInput.value = item.url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("Link Disalin", "URL berhasil disalin ke clipboard!", "success");
+        };
+
+        window.loadSampleLinks = function() {
+            const samples = [
+                { id: generateId(), name: 'LinkedIn Jobs', category: 'Job Portal', url: 'https://www.linkedin.com/jobs/', notes: 'Cek setiap pagi jam 09.00', createdAt: Date.now() + 1 },
+                { id: generateId(), name: 'Kalibrr Indonesia', category: 'Job Portal', url: 'https://www.kalibrr.com/id-ID/home', notes: 'Banyak korporat & startup', createdAt: Date.now() + 2 },
+                { id: generateId(), name: 'Glints', category: 'Job Portal', url: 'https://glints.com/id/lowongan-kerja', notes: 'Respon HR cepat', createdAt: Date.now() + 3 },
+                { id: generateId(), name: 'Karir BUMN / FHCI', category: 'BUMN / CPNS', url: 'https://rekrutmenbersama.fhcibumn.id/', notes: 'Pantau rekrutmen bersama', createdAt: Date.now() + 4 }
+            ];
+            samples.forEach(s => {
+                careerLinks.push(s);
+                saveSheetItem(s);
+            });
+            renderSheetTable();
+            showToast("Contoh Ditambahkan", "4 daftar portal karir populer berhasil dimasukkan.", "success");
+        };
+
+        function escapeAttr(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function renderSheetTable() {
+            const tbody = document.getElementById('sheet-table-body');
+            const badge = document.getElementById('sheet-count-badge');
+            if (!tbody) return;
+            if (badge) badge.innerText = careerLinks.length;
+
+            const searchVal = (document.getElementById('sheetSearchInput')?.value || '').toLowerCase();
+            let filtered = careerLinks;
+            if (searchVal) {
+                filtered = careerLinks.filter(item =>
+                    (item.name && item.name.toLowerCase().includes(searchVal)) ||
+                    (item.category && item.category.toLowerCase().includes(searchVal)) ||
+                    (item.url && item.url.toLowerCase().includes(searchVal)) ||
+                    (item.notes && item.notes.toLowerCase().includes(searchVal))
+                );
+            }
+
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-10 text-center text-gray-500 dark:text-gray-400">
+                            <p class="mb-2">Belum ada baris catatan atau link karir.</p>
+                            <button type="button" onclick="addSheetRow()" class="text-green-600 dark:text-green-400 font-semibold hover:underline">+ Tambah Baris Pertama</button>
+                            <span class="mx-2">atau</span>
+                            <button type="button" onclick="loadSampleLinks()" class="text-primary-600 dark:text-primary-400 font-semibold hover:underline">Isi Contoh Portal Karir</button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="text-center font-mono text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/80 select-none">${index + 1}</td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.name)}" placeholder="Ketik nama perusahaan..."
+                            onchange="window.updateSheetCell('${item.id}', 'name', this.value)"
+                            class="excel-input font-medium text-gray-900 dark:text-white">
+                    </td>
+                    <td class="p-0">
+                        <select onchange="window.updateSheetCell('${item.id}', 'category', this.value)"
+                            class="excel-input text-gray-700 dark:text-gray-200 cursor-pointer">
+                            <option value="Job Portal" ${item.category === 'Job Portal' ? 'selected' : ''}>Job Portal</option>
+                            <option value="Web Karir Resmi" ${item.category === 'Web Karir Resmi' ? 'selected' : ''}>Web Karir Resmi</option>
+                            <option value="BUMN / CPNS" ${item.category === 'BUMN / CPNS' ? 'selected' : ''}>BUMN / CPNS</option>
+                            <option value="Remote / Freelance" ${item.category === 'Remote / Freelance' ? 'selected' : ''}>Remote / Freelance</option>
+                            <option value="Catatan / Lainnya" ${item.category === 'Catatan / Lainnya' ? 'selected' : ''}>Catatan / Lainnya</option>
+                        </select>
+                    </td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.url)}" placeholder="https://..."
+                            onchange="window.updateSheetCell('${item.id}', 'url', this.value)"
+                            class="excel-input text-blue-600 dark:text-blue-400 underline">
+                    </td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.notes)}" placeholder="Tulis catatan..."
+                            onchange="window.updateSheetCell('${item.id}', 'notes', this.value)"
+                            class="excel-input text-gray-700 dark:text-gray-300">
+                    </td>
+                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center gap-1">
+                            <button type="button" onclick="window.openCareerUrl('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded transition-colors" title="Buka Link">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                            </button>
+                            <button type="button" onclick="window.createJobFromSheet('${item.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30 rounded transition-colors" title="Masukkan ke Lamaran">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </button>
+                            <button type="button" onclick="window.copyCareerUrl('${item.id}')" class="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded transition-colors" title="Salin URL">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                            <button type="button" onclick="window.deleteSheetRow('${item.id}')" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Hapus">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.createJobFromSheet = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item) return;
+            window.switchTab('jobs');
+            window.openModal();
+            document.getElementById('company').value = item.name || '';
+            document.getElementById('jobUrl').value = item.url || '';
+            document.getElementById('source').value = item.category || 'Web Karir Resmi';
+            document.getElementById('notes').value = item.notes || '';
+            showToast("Siap Melamar", "Data dari catatan karir telah dimasukkan ke form lamaran.", "info");
+        };
+
+        function getStatusBadge(status, jobId) {
+            const badges = {
+                'Disimpan': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
+                'Dilamar': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                'Interview HR': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+                'Interview User': 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 border-fuchsia-200 dark:border-fuchsia-800',
+                'Tes Teknis': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+                'Diterima': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800',
+                'Ditolak': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800',
+            };
+            const classes = badges[status] || badges['Disimpan'];
+            const statuses = ['Disimpan', 'Dilamar', 'Interview HR', 'Interview User', 'Tes Teknis', 'Diterima', 'Ditolak'];
+            
+            return `
+                <select onchange="window.quickUpdateStatus('${jobId}', this.value)" 
+                    class="px-2.5 py-1 text-xs font-semibold rounded-full border cursor-pointer outline-none transition-colors ${classes}">
+                    ${statuses.map(s => `<option value="${s}" class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" ${s === status ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+            `;
+        }
+
+        window.quickUpdateStatus = async function(jobId, newStatus) {
+            const idx = jobs.findIndex(j => j.id === jobId);
+            if (idx === -1) return;
+            jobs[idx].status = newStatus;
+            jobs[idx].updatedAt = new Date().toISOString();
+            localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+            renderTable();
+            updateStats();
+
+            if (userId && !isOfflineMode) {
+                try {
+                    await setDoc(doc(db, 'users', userId, 'jobs', jobId), jobs[idx]);
+                } catch (e) {
+                    console.warn("Local status update fallback:", e);
+                }
+            }
+            showToast("Status Diperbarui", `Status diubah menjadi "${newStatus}"`, "success");
+        };
+
+        function getScheduleReminder(dateString) {
+            if (!dateString) return '<span class="text-gray-400 dark:text-gray-600">-</span>';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(dateString);
+            target.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+            let badge = '';
+            if (diffDays === 0) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-full animate-pulse">HARI INI!</span>`;
+            } else if (diffDays === 1) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 rounded-full">BESOK</span>`;
+            } else if (diffDays > 1 && diffDays <= 3) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-full">H-${diffDays}</span>`;
+            }
+
+            return `<div class="flex items-center"><span class="text-sm text-primary-600 dark:text-primary-400 font-medium"><i class="fa-regular fa-calendar-check mr-1"></i>${formatDate(dateString)}</span>${badge}</div>`;
+        }
+
+        function renderTable() {
+            if (!jobTableBody) return;
+            jobTableBody.innerHTML = '';
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const filterValue = statusFilter?.value || '';
+            let displayJobs = [...jobs].sort((a, b) => new Date(b.dateApplied) - new Date(a.dateApplied));
+
+            if (searchTerm) {
+                displayJobs = displayJobs.filter(job => 
+                    job.company.toLowerCase().includes(searchTerm) || 
+                    job.position.toLowerCase().includes(searchTerm) ||
+                    (job.source && job.source.toLowerCase().includes(searchTerm)) ||
+                    (job.notes && job.notes.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (filterValue) {
+                displayJobs = displayJobs.filter(job => job.status === filterValue);
+            }
+
+            const parentWrapper = jobTableBody.parentElement ? jobTableBody.parentElement.parentElement : null;
+
+            if (displayJobs.length === 0) {
+                if (parentWrapper) parentWrapper.classList.add('hidden');
+                if (emptyState) {
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                }
+            } else {
+                if (parentWrapper) parentWrapper.classList.remove('hidden');
+                if (emptyState) {
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                }
+
+                displayJobs.forEach(job => {
+                    const tr = document.createElement('tr');
+                    tr.className = `hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group`;
+                    
+                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-1.5" title="Buka Lowongan"><i class="fa-solid fa-up-right-from-square text-xs"></i></a>` : '';
+                    
+                    const metaTags = [];
+                    if (job.source) metaTags.push(`<span class="text-[11px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded"><i class="fa-solid fa-globe mr-1 text-[10px]"></i>${escapeAttr(job.source)}</span>`);
+                    if (job.salary) metaTags.push(`<span class="text-[11px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded"><i class="fa-solid fa-money-bill-wave mr-1 text-[10px]"></i>${escapeAttr(job.salary)}</span>`);
+                    if (job.pic) metaTags.push(`<span class="text-[11px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded"><i class="fa-regular fa-id-badge mr-1 text-[10px]"></i>${escapeAttr(job.pic)}</span>`);
+
+                    const notesPreview = job.notes ? `<p class="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs truncate" title="${escapeAttr(job.notes)}"><i class="fa-regular fa-note-sticky mr-1"></i>${escapeAttr(job.notes)}</p>` : '';
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-gray-900 dark:text-white flex items-center">${escapeAttr(job.position)} ${urlLink}</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400 mt-0.5"><i class="fa-regular fa-building mr-1"></i>${escapeAttr(job.company)}</span>
+                                ${metaTags.length > 0 ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${metaTags.join('')}</div>` : ''}
+                                ${notesPreview}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">
+                            ${formatDate(job.dateApplied)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${getStatusBadge(job.status, job.id)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${getScheduleReminder(job.nextSchedule)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Edit Data"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    jobTableBody.appendChild(tr);
+                });
+            }
+        }
+
+        jobForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formJobId = document.getElementById('job-id').value;
+            const finalJobId = formJobId || generateId();
+            
+            const newJob = {
+                id: finalJobId,
+                company: document.getElementById('company').value,
+                position: document.getElementById('position').value,
+                dateApplied: document.getElementById('dateApplied').value,
+                status: document.getElementById('status').value,
+                jobUrl: document.getElementById('jobUrl').value,
+                source: document.getElementById('source').value,
+                pic: document.getElementById('pic').value,
+                nextSchedule: document.getElementById('nextSchedule').value,
+                salary: document.getElementById('salary').value,
+                notes: document.getElementById('notes').value,
+                updatedAt: new Date().toISOString()
+            };
+
+            const submitBtn = jobForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Menyimpan...'; submitBtn.disabled = true;
+
+            if (userId && !isOfflineMode) {
+                try {
+                    const jobRef = doc(db, 'users', userId, 'jobs', finalJobId);
+                    await setDoc(jobRef, newJob);
+                    showToast("Tersimpan!", "Data berhasil disimpan ke akun Google Anda.", "success");
+                } catch (error) {
+                    console.warn("Cloud save error, saving locally:", error);
+                }
+            }
+
+            if (formJobId) {
+                const idx = jobs.findIndex(j => j.id === formJobId);
+                if (idx !== -1) jobs[idx] = newJob;
+                else jobs.push(newJob);
+            } else {
+                jobs.push(newJob);
+            }
+
+            localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+            renderTable();
+            updateStats();
+
+            submitBtn.innerText = originalText; submitBtn.disabled = false;
+            window.closeModal();
+            showToast("Tersimpan!", "Data lamaran berhasil disimpan.", "success");
+        });
+
+        document.getElementById('confirm-btn').addEventListener('click', async () => {
+            if (jobToDelete) {
+                const btn = document.getElementById('confirm-btn');
+                const origText = btn.innerText;
+                btn.innerText = 'Menghapus...'; btn.disabled = true;
+
+                if (userId && !isOfflineMode) {
+                    try {
+                        await deleteDoc(doc(db, 'users', userId, 'jobs', jobToDelete));
+                    } catch (e) {
+                        console.warn("Cloud delete fallback:", e);
+                    }
+                }
+
+                jobs = jobs.filter(j => j.id !== jobToDelete);
+                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+                renderTable();
+                updateStats();
+
+                btn.innerText = origText; btn.disabled = false;
+                window.closeConfirmModal();
+                showToast("Terhapus", "Data berhasil dihapus.", "info");
+            }
+        });
+
+        window.exportToExcelCSV = function() {
+            if (jobs.length === 0 && careerLinks.length === 0) {
+                return showToast("Data Kosong", "Belum ada data untuk di-export ke Excel.", "warning");
+            }
+            const headers = ["Perusahaan", "Posisi", "Tanggal Melamar", "Status", "Jadwal Selanjutnya", "Sumber", "Kontak HR", "Gaji", "Link Lowongan", "Catatan"];
+            const rows = jobs.map(j => [
+                j.company || '', j.position || '', j.dateApplied || '', j.status || '',
+                j.nextSchedule || '', j.source || '', j.pic || '', j.salary || '', j.jobUrl || '', j.notes || ''
+            ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+
+            const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Lamaran_Kerja_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            showToast("Export Excel Berhasil", "File .CSV siap dibuka di Microsoft Excel.", "success");
+        };
+
+        window.exportToCSV = function() {
+            if (jobs.length === 0 && careerLinks.length === 0) {
+                return showToast("Data Kosong", "Tidak ada data untuk di-backup.", "warning");
+            }
+            const backupPayload = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                jobs: jobs,
+                careerLinks: careerLinks
+            };
+            const jsonContent = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
+            const linkJSON = document.createElement("a");
+            linkJSON.setAttribute("href", jsonContent);
+            linkJSON.setAttribute("download", `Backup_JobTracker_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(linkJSON); linkJSON.click(); document.body.removeChild(linkJSON);
+            showToast("Sukses Backup", "Seluruh data Lamaran & Catatan Excel berhasil didownload.", "success");
+        };
+
+        window.importData = function(event) {
+            const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(evt) {
+            reader.onload = function(e) {
                 try {
-                    const parsed = JSON.parse(evt.target.result);
-                    if (parsed.jobs) {
-                        jobs = parsed.jobs;
-                        if (userId && !isOfflineMode) {
-                            for (const j of jobs) await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'jobs', j.id), j);
-                        } else {
-                            localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                        }
+                    const parsed = JSON.parse(e.target.result);
+                    const importedJobs = Array.isArray(parsed) ? parsed : (parsed.jobs || []);
+                    const importedLinks = (!Array.isArray(parsed) && Array.isArray(parsed.careerLinks)) ? parsed.careerLinks : [];
+
+                    let addedJobs = 0;
+                    let addedLinks = 0;
+
+                    if (importedJobs.length > 0) {
+                        const existingIds = new Set(jobs.map(j => j.id));
+                        importedJobs.forEach(job => {
+                            if (!existingIds.has(job.id)) {
+                                jobs.push(job);
+                                addedJobs++;
+                                if (userId && !isOfflineMode) {
+                                    setDoc(doc(db, 'users', userId, 'jobs', job.id), job).catch(() => {});
+                                }
+                            }
+                        });
+                        localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
                     }
-                    if (parsed.links) {
-                        links = parsed.links;
-                        if (userId && !isOfflineMode) {
-                            for (const l of links) await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'links', l.id), l);
-                        } else {
-                            localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(links));
-                        }
+
+                    if (importedLinks.length > 0) {
+                        const existingLinkIds = new Set(careerLinks.map(l => l.id));
+                        importedLinks.forEach(linkItem => {
+                            if (!existingLinkIds.has(linkItem.id)) {
+                                careerLinks.push(linkItem);
+                                addedLinks++;
+                                if (userId && !isOfflineMode) {
+                                    setDoc(doc(db, 'users', userId, 'career_links', linkItem.id), linkItem).catch(() => {});
+                                }
+                            }
+                        });
+                        localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
                     }
-                    renderTable(); updateStats();
-                    showToast("Import Sukses", "Data berhasil dimuat ulang.", "success");
-                } catch(err) { showToast("Gagal", "Format file tidak valid.", "error"); }
-                e.target.value = '';
+
+                    renderTable(); updateStats(); renderSheetTable();
+                    showToast("Import Berhasil", `${addedJobs} lamaran & ${addedLinks} catatan link berhasil dipulihkan.`, "success");
+                } catch (error) {
+                    showToast("Gagal Import", "Format file backup tidak valid.", "error");
+                }
+                event.target.value = ''; 
             };
             reader.readAsText(file);
         };
 
-        document.getElementById('searchInput').addEventListener('input', renderTable);
-        document.getElementById('statusFilter').addEventListener('change', renderTable);
+        const quickSheetForm = document.getElementById('quick-sheet-form');
+        if (quickSheetForm) {
+            quickSheetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('quick-name').value.trim();
+                const category = document.getElementById('quick-category').value;
+                const url = document.getElementById('quick-url').value.trim();
+                const notes = document.getElementById('quick-notes').value.trim();
 
-        // Tema Gelap/Terang
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-            themeIcon.classList.replace('fa-moon', 'fa-sun');
+                if (!name) return;
+
+                window.addSheetRow({
+                    id: generateId(),
+                    name,
+                    category,
+                    url,
+                    notes,
+                    createdAt: Date.now()
+                });
+
+                quickSheetForm.reset();
+                showToast("Baris Ditambahkan", "Catatan karir baru berhasil disimpan.", "success");
+            });
         }
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                localStorage.setItem('theme', 'light');
-                themeIcon.classList.replace('fa-sun', 'fa-moon');
-            }
-        });
+
+        const sheetSearchInput = document.getElementById('sheetSearchInput');
+        if (sheetSearchInput) {
+            sheetSearchInput.addEventListener('input', () => renderSheetTable());
+        }
+
+        if (searchInput) searchInput.addEventListener('input', () => renderTable());
+        if (statusFilter) statusFilter.addEventListener('change', () => renderTable());
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function updateStats() {
+            const total = jobs.length;
+            const interview = jobs.filter(j => ['Interview HR', 'Interview User', 'Tes Teknis'].includes(j.status)).length;
+            const offered = jobs.filter(j => j.status === 'Diterima').length;
+            const rejected = jobs.filter(j => j.status === 'Ditolak').length;
+
+            const elTotal = document.getElementById('stat-total');
+            const elInterview = document.getElementById('stat-interview');
+            const elOffered = document.getElementById('stat-offered');
+            const elRejected = document.getElementById('stat-rejected');
+
+            if (elTotal) elTotal.innerText = total;
+            if (elInterview) elInterview.innerText = interview;
+            if (elOffered) elOffered.innerText = offered;
+            if (elRejected) elRejected.innerText = rejected;
+        }
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                if (themeIcon) {
+                    themeIcon.className = isDark ? 'fa-solid fa-sun text-yellow-400 text-lg' : 'fa-solid fa-moon text-gray-600 dark:text-gray-300 text-lg';
+                }
+            });
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-yellow-400 text-lg';
+        }
 
         initCloud();
     </script>
