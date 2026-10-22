@@ -55,6 +55,28 @@
         .dark ::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
+        .excel-table th, .excel-table td {
+            border: 1px solid #e2e8f0;
+        }
+        .dark .excel-table th, .dark .excel-table td {
+            border: 1px solid #334155;
+        }
+        .excel-input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            padding: 8px 10px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+        .excel-input:focus {
+            background-color: #eff6ff;
+            box-shadow: inset 0 0 0 2px #2563eb;
+        }
+        .dark .excel-input:focus {
+            background-color: #1e293b;
+            box-shadow: inset 0 0 0 2px #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300 min-h-screen pb-20">
@@ -115,6 +137,25 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
+            <div class="flex items-center gap-2">
+                <button type="button" id="tab-btn-jobs" onclick="switchTab('jobs')" class="px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Daftar Lamaran Kerja</span>
+                </button>
+                <button type="button" id="tab-btn-sheet" onclick="switchTab('sheet')" class="px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700">
+                    <i class="fa-solid fa-table text-green-600 dark:text-green-400"></i>
+                    <span>Catatan & Link Karir (Excel)</span>
+                    <span id="sheet-count-badge" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">0</span>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 hidden md:block">
+                <i class="fa-solid fa-cloud-arrow-up mr-1 text-primary-500"></i> Semua perubahan otomatis tersimpan
+            </p>
+        </div>
+
+        <!-- TAB 1: PELACAK LAMARAN KERJA -->
+        <div id="tab-content-jobs">
         <section class="mb-8">
             <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ringkasan Lamaran</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -198,6 +239,98 @@
                 </div>
             </div>
         </section>
+        </div>
+
+        <!-- TAB 2: CATATAN & LINK KARIR (MIRIP EXCEL) -->
+        <div id="tab-content-sheet" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 mb-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-green-600"></i>
+                            Spreadsheet Link Karir & Catatan Pribadi
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Klik langsung pada kotak sel di bawah untuk mengetik seperti di Excel. Ketikan Anda otomatis tersimpan!
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <div class="relative flex-1 sm:w-60">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="sheetSearchInput" placeholder="Cari portal, link, atau catatan..." class="pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-xs sm:text-sm focus:ring-2 focus:ring-green-500 outline-none dark:text-white w-full">
+                        </div>
+                        <button type="button" onclick="addSheetRow()" class="bg-green-600 hover:bg-green-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm shadow-sm transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> <span>Tambah Baris</span>
+                        </button>
+                        <button type="button" onclick="loadSampleLinks()" class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5" title="Masukkan contoh daftar link karir populer">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> <span>Isi Contoh Link</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Baris Tambah Cepat (Mirip Formula Bar Excel) -->
+                <form id="quick-sheet-form" class="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-green-50/60 dark:bg-gray-700/40 p-3 rounded-lg border border-green-200 dark:border-gray-600 mb-4">
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-name" required placeholder="Nama Portal / Web Karir (mis: BUMN, Kalibrr)" class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <select id="quick-category" class="w-full px-2.5 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                            <option value="Job Portal">Job Portal</option>
+                            <option value="Web Karir Resmi">Web Karir Resmi</option>
+                            <option value="BUMN / CPNS">BUMN / CPNS</option>
+                            <option value="Remote / Freelance">Remote / Freelance</option>
+                            <option value="Catatan / Lainnya">Catatan / Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-url" placeholder="Link URL (mis: https://careers.google.com)" class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <input type="text" id="quick-notes" placeholder="Catatan pribadi / akun / jadwal cek..." class="w-full px-3 py-1.5 text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-green-600">
+                    </div>
+                    <div class="sm:col-span-1 flex">
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm rounded py-1.5 px-2 transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-check"></i> <span class="sm:hidden">Simpan</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Tabel Spreadsheet Mirip Excel -->
+                <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-600">
+                    <table class="min-w-full excel-table border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <!-- Header Huruf Kolom ala Excel -->
+                            <tr class="bg-gray-200/80 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-[11px] font-mono select-none">
+                                <th class="w-10 py-1 text-center">#</th>
+                                <th class="py-1 text-center">A</th>
+                                <th class="py-1 text-center w-40">B</th>
+                                <th class="py-1 text-center">C</th>
+                                <th class="py-1 text-center">D</th>
+                                <th class="w-28 py-1 text-center">AKSI</th>
+                            </tr>
+                            <!-- Header Nama Kolom -->
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold">
+                                <th class="py-2.5 px-2 text-center bg-gray-100 dark:bg-gray-800">No</th>
+                                <th class="py-2.5 px-3 text-left min-w-[180px]">Nama Portal / Perusahaan</th>
+                                <th class="py-2.5 px-3 text-left min-w-[150px]">Kategori</th>
+                                <th class="py-2.5 px-3 text-left min-w-[240px]">Link Website Karir (URL)</th>
+                                <th class="py-2.5 px-3 text-left min-w-[260px]">Catatan Pribadi (Info Login / Ket.)</th>
+                                <th class="py-2.5 px-3 text-center">Buka / Hapus</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sheet-table-body" class="bg-white dark:bg-gray-800">
+                            <!-- Baris Excel dirender dari JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 flex flex-wrap justify-between items-center text-xs text-gray-500 dark:text-gray-400 gap-2">
+                    <span>💡 <b>Tips:</b> Klik sel mana saja untuk langsung mengedit isinya. Tekan ikon <i class="fa-solid fa-up-right-from-square text-blue-500 mx-0.5"></i> untuk langsung membuka web karir.</span>
+                    <button type="button" onclick="addSheetRow()" class="text-green-600 dark:text-green-400 hover:underline font-medium">+ Tambah baris kosong di bawah</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -344,9 +477,11 @@
 
         // --- State Management ---
         let jobs = [];
+        let careerLinks = [];
         let jobToDelete = null;
         let userId = null;
         let unsubscribeSnapshot = null;
+        let unsubscribeLinksSnapshot = null;
 
         // --- DOM Elements ---
         const themeToggleBtn = document.getElementById('theme-toggle');
@@ -546,8 +681,17 @@
                     jobs = [];
                 }
             }
+            const storedLinks = localStorage.getItem('jobTrackerLinks_v1');
+            if (storedLinks) {
+                try {
+                    careerLinks = JSON.parse(storedLinks);
+                } catch (e) {
+                    careerLinks = [];
+                }
+            }
             renderTable();
             updateStats();
+            renderSheetTable();
         }
 
         function updateAuthUI(user) {
@@ -578,6 +722,10 @@
                 unsubscribeSnapshot();
                 unsubscribeSnapshot = null;
             }
+            if (unsubscribeLinksSnapshot) {
+                unsubscribeLinksSnapshot();
+                unsubscribeLinksSnapshot = null;
+            }
 
             if (!user || user.isAnonymous) {
                 userId = null;
@@ -606,7 +754,242 @@
                     loadLocalJobs();
                 }
             });
+
+            const linksCollection = collection(db, 'users', userId, 'career_links');
+            unsubscribeLinksSnapshot = onSnapshot(linksCollection, (snapshot) => {
+                careerLinks = [];
+                snapshot.forEach((docSnap) => {
+                    careerLinks.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                careerLinks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+                renderSheetTable();
+            }, (error) => {
+                console.warn("Links local fallback:", error.code);
+            });
         }
+
+        window.switchTab = function(tabName) {
+            const jobsContent = document.getElementById('tab-content-jobs');
+            const sheetContent = document.getElementById('tab-content-sheet');
+            const btnJobs = document.getElementById('tab-btn-jobs');
+            const btnSheet = document.getElementById('tab-btn-sheet');
+
+            if (tabName === 'sheet') {
+                jobsContent.classList.add('hidden');
+                sheetContent.classList.remove('hidden');
+                btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-green-600 text-white shadow-sm";
+                btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
+                renderSheetTable();
+            } else {
+                sheetContent.classList.add('hidden');
+                jobsContent.classList.remove('hidden');
+                btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm";
+                btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
+            }
+        };
+
+        async function saveSheetItem(item) {
+            localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+            document.getElementById('sheet-count-badge').innerText = careerLinks.length;
+            if (userId && !isOfflineMode) {
+                try {
+                    const linkRef = doc(db, 'users', userId, 'career_links', item.id);
+                    await setDoc(linkRef, item);
+                } catch (e) {
+                    console.warn("Saved locally:", e);
+                }
+            }
+        }
+
+        window.addSheetRow = function(customData = null) {
+            const newItem = customData || {
+                id: generateId(),
+                name: '',
+                category: 'Web Karir Resmi',
+                url: '',
+                notes: '',
+                createdAt: Date.now()
+            };
+            careerLinks.push(newItem);
+            saveSheetItem(newItem);
+            renderSheetTable();
+        };
+
+        window.updateSheetCell = function(id, field, value) {
+            const idx = careerLinks.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                careerLinks[idx][field] = value;
+                saveSheetItem(careerLinks[idx]);
+            }
+        };
+
+        window.deleteSheetRow = async function(id) {
+            careerLinks = careerLinks.filter(item => item.id !== id);
+            localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+            renderSheetTable();
+            if (userId && !isOfflineMode) {
+                try {
+                    await deleteDoc(doc(db, 'users', userId, 'career_links', id));
+                } catch (e) {
+                    console.warn("Deleted locally:", e);
+                }
+            }
+            showToast("Baris Dihapus", "Baris catatan karir telah dihapus.", "info");
+        };
+
+        window.openCareerUrl = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item || !item.url || !item.url.trim()) {
+                showToast("Link Kosong", "Silakan isi kolom Link Website Karir terlebih dahulu.", "warning");
+                return;
+            }
+            let targetUrl = item.url.trim();
+            if (!/^https?:\/\//i.test(targetUrl)) {
+                targetUrl = 'https://' + targetUrl;
+            }
+            window.open(targetUrl, '_blank');
+        };
+
+        window.copyCareerUrl = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item || !item.url) {
+                showToast("Link Kosong", "Tidak ada link untuk disalin.", "warning");
+                return;
+            }
+            const tempInput = document.createElement('input');
+            tempInput.value = item.url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("Link Disalin", "URL berhasil disalin ke clipboard!", "success");
+        };
+
+        window.loadSampleLinks = function() {
+            const samples = [
+                { id: generateId(), name: 'LinkedIn Jobs', category: 'Job Portal', url: 'https://www.linkedin.com/jobs/', notes: 'Cek setiap pagi jam 09.00, nyalakan alert posisi IT/Admin', createdAt: Date.now() + 1 },
+                { id: generateId(), name: 'Kalibrr Indonesia', category: 'Job Portal', url: 'https://www.kalibrr.com/id-ID/home', notes: 'Banyak perusahaan korporat & startup besar', createdAt: Date.now() + 2 },
+                { id: generateId(), name: 'Glints', category: 'Job Portal', url: 'https://glints.com/id/lowongan-kerja', notes: 'Respon HR cukup cepat, CV sudah diupdate', createdAt: Date.now() + 3 },
+                { id: generateId(), name: 'Karir BUMN / FHCI', category: 'BUMN / CPNS', url: 'https://rekrutmenbersama.fhcibumn.id/', notes: 'Pantau jadwal pembukaan Rekrutmen Bersama', createdAt: Date.now() + 4 }
+            ];
+            samples.forEach(s => {
+                careerLinks.push(s);
+                saveSheetItem(s);
+            });
+            renderSheetTable();
+            showToast("Contoh Ditambahkan", "4 daftar portal karir populer berhasil dimasukkan.", "success");
+        };
+
+        function escapeAttr(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function renderSheetTable() {
+            const tbody = document.getElementById('sheet-table-body');
+            const badge = document.getElementById('sheet-count-badge');
+            if (!tbody) return;
+            badge.innerText = careerLinks.length;
+
+            const searchVal = (document.getElementById('sheetSearchInput')?.value || '').toLowerCase();
+            let filtered = careerLinks;
+            if (searchVal) {
+                filtered = careerLinks.filter(item =>
+                    (item.name && item.name.toLowerCase().includes(searchVal)) ||
+                    (item.category && item.category.toLowerCase().includes(searchVal)) ||
+                    (item.url && item.url.toLowerCase().includes(searchVal)) ||
+                    (item.notes && item.notes.toLowerCase().includes(searchVal))
+                );
+            }
+
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-10 text-center text-gray-500 dark:text-gray-400">
+                            <p class="mb-2">Belum ada baris catatan atau link karir.</p>
+                            <button type="button" onclick="addSheetRow()" class="text-green-600 dark:text-green-400 font-semibold hover:underline">+ Tambah Baris Pertama</button>
+                            <span class="mx-2">atau</span>
+                            <button type="button" onclick="loadSampleLinks()" class="text-primary-600 dark:text-primary-400 font-semibold hover:underline">Isi Contoh Portal Karir</button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="text-center font-mono text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/80 select-none">${index + 1}</td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.name)}" placeholder="Ketik nama perusahaan/portal..."
+                            onchange="window.updateSheetCell('${item.id}', 'name', this.value)"
+                            class="excel-input font-medium text-gray-900 dark:text-white">
+                    </td>
+                    <td class="p-0">
+                        <select onchange="window.updateSheetCell('${item.id}', 'category', this.value)"
+                            class="excel-input text-gray-700 dark:text-gray-200 cursor-pointer">
+                            <option value="Job Portal" ${item.category === 'Job Portal' ? 'selected' : ''}>Job Portal</option>
+                            <option value="Web Karir Resmi" ${item.category === 'Web Karir Resmi' ? 'selected' : ''}>Web Karir Resmi</option>
+                            <option value="BUMN / CPNS" ${item.category === 'BUMN / CPNS' ? 'selected' : ''}>BUMN / CPNS</option>
+                            <option value="Remote / Freelance" ${item.category === 'Remote / Freelance' ? 'selected' : ''}>Remote / Freelance</option>
+                            <option value="Catatan / Lainnya" ${item.category === 'Catatan / Lainnya' ? 'selected' : ''}>Catatan / Lainnya</option>
+                        </select>
+                    </td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.url)}" placeholder="https://..."
+                            onchange="window.updateSheetCell('${item.id}', 'url', this.value)"
+                            class="excel-input text-blue-600 dark:text-blue-400 underline">
+                    </td>
+                    <td class="p-0">
+                        <input type="text" value="${escapeAttr(item.notes)}" placeholder="Tulis catatan, username, jadwal cek..."
+                            onchange="window.updateSheetCell('${item.id}', 'notes', this.value)"
+                            class="excel-input text-gray-700 dark:text-gray-300">
+                    </td>
+                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center gap-1">
+                            <button type="button" onclick="window.openCareerUrl('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded transition-colors" title="Buka Link di Tab Baru">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                            </button>
+                            <button type="button" onclick="window.copyCareerUrl('${item.id}')" class="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded transition-colors" title="Salin Link URL">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                            <button type="button" onclick="window.deleteSheetRow('${item.id}')" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Hapus Baris">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('quick-sheet-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameEl = document.getElementById('quick-name');
+            const catEl = document.getElementById('quick-category');
+            const urlEl = document.getElementById('quick-url');
+            const notesEl = document.getElementById('quick-notes');
+
+            window.addSheetRow({
+                id: generateId(),
+                name: nameEl.value,
+                category: catEl.value,
+                url: urlEl.value,
+                notes: notesEl.value,
+                createdAt: Date.now()
+            });
+
+            nameEl.value = '';
+            urlEl.value = '';
+            notesEl.value = '';
+            showToast("Baris Ditambahkan", "Link karir & catatan berhasil masuk ke tabel.", "success");
+        });
+
+        document.getElementById('sheetSearchInput')?.addEventListener('input', () => renderSheetTable());
 
         function init() {
             if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
