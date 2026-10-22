@@ -34,7 +34,6 @@
         }
     </script>
     <style>
-        /* Custom Scrollbar for better aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -198,11 +197,14 @@
                             <option value="Diterima">Diterima</option>
                             <option value="Ditolak">Ditolak</option>
                         </select>
-                        <button type="button" onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0">
-                            <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Export / Backup</span>
+                        <button type="button" onclick="exportToExcelCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Download tabel ke format Microsoft Excel (.csv)">
+                            <i class="fa-solid fa-file-csv"></i> <span class="hidden sm:inline">Excel (.CSV)</span>
                         </button>
-                        <button type="button" onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Pindahkan data dari HP/Laptop lain">
-                            <i class="fa-solid fa-file-import"></i> <span class="hidden sm:inline">Import Data</span>
+                        <button type="button" onclick="exportToCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Simpan seluruh data Lamaran & Catatan Link">
+                            <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Backup Data</span>
+                        </button>
+                        <button type="button" onclick="document.getElementById('importFile').click()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors flex items-center justify-center gap-2 flex-shrink-0" title="Pulihkan data dari file Backup">
+                            <i class="fa-solid fa-file-import"></i> <span class="hidden sm:inline">Import</span>
                         </button>
                         <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
                     </div>
@@ -459,7 +461,7 @@
         import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // KONFIGURASI FIREBASE ASLI MILIK ANDA (SUDAH TERPASANG)
+        // KONFIGURASI FIREBASE ASLI MILIK ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyD_vmv82okTt_Clpkgd9oPA1hlrGitWDuo",
             authDomain: "job-tracker-d664b.firebaseapp.com",
@@ -590,6 +592,29 @@
             confirmModal.classList.add('hidden');
         };
 
+        // --- GLOBAL SCOPE SWITCH TAB FUNCTION ---
+        window.switchTab = function(tabName) {
+            const jobsContent = document.getElementById('tab-content-jobs');
+            const sheetContent = document.getElementById('tab-content-sheet');
+            const btnJobs = document.getElementById('tab-btn-jobs');
+            const btnSheet = document.getElementById('tab-btn-sheet');
+
+            if (!jobsContent || !sheetContent) return;
+
+            if (tabName === 'sheet') {
+                jobsContent.classList.add('hidden');
+                sheetContent.classList.remove('hidden');
+                if (btnSheet) btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-green-600 text-white shadow-sm";
+                if (btnJobs) btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
+                renderSheetTable();
+            } else {
+                sheetContent.classList.add('hidden');
+                jobsContent.classList.remove('hidden');
+                if (btnJobs) btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm";
+                if (btnSheet) btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
+            }
+        };
+
         try {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
@@ -600,7 +625,6 @@
         }
 
         async function initCloud() {
-            // Load data lokal terlebih dahulu agar tabel langsung tampil
             loadLocalJobs();
 
             if (isOfflineMode || !auth) {
@@ -610,47 +634,47 @@
             const googleProvider = new GoogleAuthProvider();
             googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-            // Pasang event listener tombol Login Google secara langsung (tidak akan terhalang error lain)
             const loginBtn = document.getElementById('login-btn');
-            loginBtn.addEventListener('click', async () => {
-                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-primary-600"></i> <span>Membuka Google...</span>';
-                loginBtn.disabled = true;
-                try {
-                    // Membuka popup pilih akun Google
-                    const result = await signInWithPopup(auth, googleProvider);
-                    if (result && result.user) {
-                        showToast(
-                            `Halo, ${result.user.displayName || 'Pengguna'}!`,
-                            `Berhasil masuk dengan ${result.user.email}`,
-                            "success",
-                            result.user.photoURL
-                        );
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async () => {
+                    loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-primary-600"></i> <span>Membuka Google...</span>';
+                    loginBtn.disabled = true;
+                    try {
+                        const result = await signInWithPopup(auth, googleProvider);
+                        if (result && result.user) {
+                            showToast(
+                                `Halo, ${result.user.displayName || 'Pengguna'}!`,
+                                `Berhasil masuk dengan ${result.user.email}`,
+                                "success",
+                                result.user.photoURL
+                            );
+                        }
+                    } catch (error) {
+                        if (error.code === 'auth/popup-blocked') {
+                            showToast("Mengalihkan...", "Membuka halaman login Google...", "info");
+                            signInWithRedirect(auth, googleProvider);
+                            return;
+                        }
+                        handleAuthError(error);
+                    } finally {
+                        loginBtn.disabled = false;
+                        updateAuthUI(auth.currentUser);
                     }
-                } catch (error) {
-                    // Jika browser memblokir popup, otomatis alihkan dengan Redirect
-                    if (error.code === 'auth/popup-blocked') {
-                        showToast("Mengalihkan...", "Membuka halaman login Google...", "info");
-                        signInWithRedirect(auth, googleProvider);
-                        return;
+                });
+            }
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        showToast("Logout Berhasil", "Anda telah keluar dari akun Google.", "info");
+                    } catch(e) {
+                        showToast("Gagal Logout", e.message, "error");
                     }
-                    handleAuthError(error);
-                } finally {
-                    loginBtn.disabled = false;
-                    updateAuthUI(auth.currentUser);
-                }
-            });
+                });
+            }
 
-            // Pasang event listener tombol Logout
-            document.getElementById('logout-btn').addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    showToast("Logout Berhasil", "Anda telah keluar dari akun Google.", "info");
-                } catch(e) {
-                    showToast("Gagal Logout", e.message, "error");
-                }
-            });
-
-            // Tangkap hasil jika menggunakan fallback Redirect
             try {
                 const redirectResult = await getRedirectResult(auth);
                 if (redirectResult && redirectResult.user) {
@@ -665,7 +689,6 @@
                 handleAuthError(error);
             }
 
-            // Pantau status login pengguna
             onAuthStateChanged(auth, (user) => {
                 updateAuthUI(user);
                 setupDataListener(user);
@@ -701,19 +724,24 @@
             const userEmail = document.getElementById('user-email');
             const userAvatar = document.getElementById('user-avatar');
 
+            if (!loginBtn) return;
             loginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span>Login Google</span>';
 
             if (user && !user.isAnonymous) {
                 loginBtn.classList.add('hidden');
-                userProfilePill.classList.remove('hidden');
-                userProfilePill.classList.add('flex');
-                userName.innerText = user.displayName || 'Pengguna';
-                userEmail.innerText = user.email || 'Tersinkronisasi';
-                userAvatar.src = user.photoURL || 'https://placehold.co/64x64/2563eb/ffffff?text=U';
+                if (userProfilePill) {
+                    userProfilePill.classList.remove('hidden');
+                    userProfilePill.classList.add('flex');
+                }
+                if (userName) userName.innerText = user.displayName || 'Pengguna';
+                if (userEmail) userEmail.innerText = user.email || 'Tersinkronisasi';
+                if (userAvatar) userAvatar.src = user.photoURL || 'https://placehold.co/64x64/2563eb/ffffff?text=U';
             } else {
                 loginBtn.classList.remove('hidden');
-                userProfilePill.classList.add('hidden');
-                userProfilePill.classList.remove('flex');
+                if (userProfilePill) {
+                    userProfilePill.classList.add('hidden');
+                    userProfilePill.classList.remove('flex');
+                }
             }
         }
 
@@ -736,18 +764,37 @@
             userId = user.uid;
             const jobsCollection = collection(db, 'users', userId, 'jobs');
             
-            unsubscribeSnapshot = onSnapshot(jobsCollection, (snapshot) => {
-                jobs = [];
+            const localJobsBackup = [...jobs];
+            let initialJobsSynced = false;
+
+            unsubscribeSnapshot = onSnapshot(jobsCollection, async (snapshot) => {
+                const cloudIds = new Set();
+                const fetchedJobs = [];
                 snapshot.forEach((docSnap) => {
-                    jobs.push({ id: docSnap.id, ...docSnap.data() });
+                    cloudIds.add(docSnap.id);
+                    fetchedJobs.push({ id: docSnap.id, ...docSnap.data() });
                 });
-                // Simpan juga cadangannya ke lokal
+
+                if (!initialJobsSynced && localJobsBackup.length > 0) {
+                    initialJobsSynced = true;
+                    for (const localJob of localJobsBackup) {
+                        if (localJob.id && !cloudIds.has(localJob.id)) {
+                            try {
+                                await setDoc(doc(db, 'users', userId, 'jobs', localJob.id), localJob);
+                                fetchedJobs.push(localJob);
+                            } catch (e) {
+                                console.warn("Sync job skip:", e);
+                            }
+                        }
+                    }
+                }
+
+                jobs = fetchedJobs;
                 localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
                 renderTable();
                 updateStats();
             }, (error) => {
                 console.error("Error fetching data:", error);
-                // Jika Firestore Rules belum diatur, tetap gunakan penyimpanan lokal tanpa merusak aplikasi
                 if (error.code === 'permission-denied') {
                     showToast("Mode Penyimpanan Lokal", "Akun Google aktif. Data disimpan di perangkat ini.", "warning", user.photoURL);
                     userId = null;
@@ -755,12 +802,33 @@
                 }
             });
 
+            const localLinksBackup = [...careerLinks];
+            let initialLinksSynced = false;
+
             const linksCollection = collection(db, 'users', userId, 'career_links');
-            unsubscribeLinksSnapshot = onSnapshot(linksCollection, (snapshot) => {
-                careerLinks = [];
+            unsubscribeLinksSnapshot = onSnapshot(linksCollection, async (snapshot) => {
+                const cloudLinkIds = new Set();
+                const fetchedLinks = [];
                 snapshot.forEach((docSnap) => {
-                    careerLinks.push({ id: docSnap.id, ...docSnap.data() });
+                    cloudLinkIds.add(docSnap.id);
+                    fetchedLinks.push({ id: docSnap.id, ...docSnap.data() });
                 });
+
+                if (!initialLinksSynced && localLinksBackup.length > 0) {
+                    initialLinksSynced = true;
+                    for (const localLink of localLinksBackup) {
+                        if (localLink.id && !cloudLinkIds.has(localLink.id)) {
+                            try {
+                                await setDoc(doc(db, 'users', userId, 'career_links', localLink.id), localLink);
+                                fetchedLinks.push(localLink);
+                            } catch (e) {
+                                console.warn("Sync link skip:", e);
+                            }
+                        }
+                    }
+                }
+
+                careerLinks = fetchedLinks;
                 careerLinks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
                 localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
                 renderSheetTable();
@@ -769,29 +837,10 @@
             });
         }
 
-        window.switchTab = function(tabName) {
-            const jobsContent = document.getElementById('tab-content-jobs');
-            const sheetContent = document.getElementById('tab-content-sheet');
-            const btnJobs = document.getElementById('tab-btn-jobs');
-            const btnSheet = document.getElementById('tab-btn-sheet');
-
-            if (tabName === 'sheet') {
-                jobsContent.classList.add('hidden');
-                sheetContent.classList.remove('hidden');
-                btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-green-600 text-white shadow-sm";
-                btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
-                renderSheetTable();
-            } else {
-                sheetContent.classList.add('hidden');
-                jobsContent.classList.remove('hidden');
-                btnJobs.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-primary-600 text-white shadow-sm";
-                btnSheet.className = "px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700";
-            }
-        };
-
         async function saveSheetItem(item) {
             localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
-            document.getElementById('sheet-count-badge').innerText = careerLinks.length;
+            const badge = document.getElementById('sheet-count-badge');
+            if (badge) badge.innerText = careerLinks.length;
             if (userId && !isOfflineMode) {
                 try {
                     const linkRef = doc(db, 'users', userId, 'career_links', item.id);
@@ -868,10 +917,10 @@
 
         window.loadSampleLinks = function() {
             const samples = [
-                { id: generateId(), name: 'LinkedIn Jobs', category: 'Job Portal', url: 'https://www.linkedin.com/jobs/', notes: 'Cek setiap pagi jam 09.00, nyalakan alert posisi IT/Admin', createdAt: Date.now() + 1 },
-                { id: generateId(), name: 'Kalibrr Indonesia', category: 'Job Portal', url: 'https://www.kalibrr.com/id-ID/home', notes: 'Banyak perusahaan korporat & startup besar', createdAt: Date.now() + 2 },
-                { id: generateId(), name: 'Glints', category: 'Job Portal', url: 'https://glints.com/id/lowongan-kerja', notes: 'Respon HR cukup cepat, CV sudah diupdate', createdAt: Date.now() + 3 },
-                { id: generateId(), name: 'Karir BUMN / FHCI', category: 'BUMN / CPNS', url: 'https://rekrutmenbersama.fhcibumn.id/', notes: 'Pantau jadwal pembukaan Rekrutmen Bersama', createdAt: Date.now() + 4 }
+                { id: generateId(), name: 'LinkedIn Jobs', category: 'Job Portal', url: 'https://www.linkedin.com/jobs/', notes: 'Cek setiap pagi jam 09.00', createdAt: Date.now() + 1 },
+                { id: generateId(), name: 'Kalibrr Indonesia', category: 'Job Portal', url: 'https://www.kalibrr.com/id-ID/home', notes: 'Banyak korporat & startup', createdAt: Date.now() + 2 },
+                { id: generateId(), name: 'Glints', category: 'Job Portal', url: 'https://glints.com/id/lowongan-kerja', notes: 'Respon HR cepat', createdAt: Date.now() + 3 },
+                { id: generateId(), name: 'Karir BUMN / FHCI', category: 'BUMN / CPNS', url: 'https://rekrutmenbersama.fhcibumn.id/', notes: 'Pantau rekrutmen bersama', createdAt: Date.now() + 4 }
             ];
             samples.forEach(s => {
                 careerLinks.push(s);
@@ -890,7 +939,7 @@
             const tbody = document.getElementById('sheet-table-body');
             const badge = document.getElementById('sheet-count-badge');
             if (!tbody) return;
-            badge.innerText = careerLinks.length;
+            if (badge) badge.innerText = careerLinks.length;
 
             const searchVal = (document.getElementById('sheetSearchInput')?.value || '').toLowerCase();
             let filtered = careerLinks;
@@ -925,7 +974,7 @@
                 tr.innerHTML = `
                     <td class="text-center font-mono text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/80 select-none">${index + 1}</td>
                     <td class="p-0">
-                        <input type="text" value="${escapeAttr(item.name)}" placeholder="Ketik nama perusahaan/portal..."
+                        <input type="text" value="${escapeAttr(item.name)}" placeholder="Ketik nama perusahaan..."
                             onchange="window.updateSheetCell('${item.id}', 'name', this.value)"
                             class="excel-input font-medium text-gray-900 dark:text-white">
                     </td>
@@ -945,19 +994,22 @@
                             class="excel-input text-blue-600 dark:text-blue-400 underline">
                     </td>
                     <td class="p-0">
-                        <input type="text" value="${escapeAttr(item.notes)}" placeholder="Tulis catatan, username, jadwal cek..."
+                        <input type="text" value="${escapeAttr(item.notes)}" placeholder="Tulis catatan..."
                             onchange="window.updateSheetCell('${item.id}', 'notes', this.value)"
                             class="excel-input text-gray-700 dark:text-gray-300">
                     </td>
                     <td class="px-2 py-1 text-center whitespace-nowrap">
                         <div class="flex items-center justify-center gap-1">
-                            <button type="button" onclick="window.openCareerUrl('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded transition-colors" title="Buka Link di Tab Baru">
+                            <button type="button" onclick="window.openCareerUrl('${item.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded transition-colors" title="Buka Link">
                                 <i class="fa-solid fa-up-right-from-square"></i>
                             </button>
-                            <button type="button" onclick="window.copyCareerUrl('${item.id}')" class="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded transition-colors" title="Salin Link URL">
+                            <button type="button" onclick="window.createJobFromSheet('${item.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30 rounded transition-colors" title="Masukkan ke Lamaran">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </button>
+                            <button type="button" onclick="window.copyCareerUrl('${item.id}')" class="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded transition-colors" title="Salin URL">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
-                            <button type="button" onclick="window.deleteSheetRow('${item.id}')" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Hapus Baris">
+                            <button type="button" onclick="window.deleteSheetRow('${item.id}')" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors" title="Hapus">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -967,72 +1019,19 @@
             });
         }
 
-        document.getElementById('quick-sheet-form')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nameEl = document.getElementById('quick-name');
-            const catEl = document.getElementById('quick-category');
-            const urlEl = document.getElementById('quick-url');
-            const notesEl = document.getElementById('quick-notes');
+        window.createJobFromSheet = function(id) {
+            const item = careerLinks.find(i => i.id === id);
+            if (!item) return;
+            window.switchTab('jobs');
+            window.openModal();
+            document.getElementById('company').value = item.name || '';
+            document.getElementById('jobUrl').value = item.url || '';
+            document.getElementById('source').value = item.category || 'Web Karir Resmi';
+            document.getElementById('notes').value = item.notes || '';
+            showToast("Siap Melamar", "Data dari catatan karir telah dimasukkan ke form lamaran.", "info");
+        };
 
-            window.addSheetRow({
-                id: generateId(),
-                name: nameEl.value,
-                category: catEl.value,
-                url: urlEl.value,
-                notes: notesEl.value,
-                createdAt: Date.now()
-            });
-
-            nameEl.value = '';
-            urlEl.value = '';
-            notesEl.value = '';
-            showToast("Baris Ditambahkan", "Link karir & catatan berhasil masuk ke tabel.", "success");
-        });
-
-        document.getElementById('sheetSearchInput')?.addEventListener('input', () => renderSheetTable());
-
-        function init() {
-            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                htmlElement.classList.add('dark');
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                htmlElement.classList.remove('dark');
-                themeIcon.classList.replace('fa-sun', 'fa-moon');
-            }
-
-            initCloud();
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            htmlElement.classList.toggle('dark');
-            if (htmlElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                localStorage.setItem('theme', 'light');
-                themeIcon.classList.replace('fa-sun', 'fa-moon');
-            }
-        });
-
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '-';
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            return new Date(dateString).toLocaleDateString('id-ID', options);
-        }
-
-        function updateStats() {
-            document.getElementById('stat-total').innerText = jobs.length;
-            const interviewStatuses = ['Interview HR', 'Interview User', 'Tes Teknis'];
-            document.getElementById('stat-interview').innerText = jobs.filter(j => interviewStatuses.includes(j.status)).length;
-            document.getElementById('stat-offered').innerText = jobs.filter(j => j.status === 'Diterima').length;
-            document.getElementById('stat-rejected').innerText = jobs.filter(j => j.status === 'Ditolak').length;
-        }
-
-        function getStatusBadge(status) {
+        function getStatusBadge(status, jobId) {
             const badges = {
                 'Disimpan': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
                 'Dilamar': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
@@ -1043,19 +1042,67 @@
                 'Ditolak': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800',
             };
             const classes = badges[status] || badges['Disimpan'];
-            return `<span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${classes}">${status}</span>`;
+            const statuses = ['Disimpan', 'Dilamar', 'Interview HR', 'Interview User', 'Tes Teknis', 'Diterima', 'Ditolak'];
+            
+            return `
+                <select onchange="window.quickUpdateStatus('${jobId}', this.value)" 
+                    class="px-2.5 py-1 text-xs font-semibold rounded-full border cursor-pointer outline-none transition-colors ${classes}">
+                    ${statuses.map(s => `<option value="${s}" class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" ${s === status ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+            `;
+        }
+
+        window.quickUpdateStatus = async function(jobId, newStatus) {
+            const idx = jobs.findIndex(j => j.id === jobId);
+            if (idx === -1) return;
+            jobs[idx].status = newStatus;
+            jobs[idx].updatedAt = new Date().toISOString();
+            localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+            renderTable();
+            updateStats();
+
+            if (userId && !isOfflineMode) {
+                try {
+                    await setDoc(doc(db, 'users', userId, 'jobs', jobId), jobs[idx]);
+                } catch (e) {
+                    console.warn("Local status update fallback:", e);
+                }
+            }
+            showToast("Status Diperbarui", `Status diubah menjadi "${newStatus}"`, "success");
+        };
+
+        function getScheduleReminder(dateString) {
+            if (!dateString) return '<span class="text-gray-400 dark:text-gray-600">-</span>';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(dateString);
+            target.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+            let badge = '';
+            if (diffDays === 0) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-full animate-pulse">HARI INI!</span>`;
+            } else if (diffDays === 1) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 rounded-full">BESOK</span>`;
+            } else if (diffDays > 1 && diffDays <= 3) {
+                badge = `<span class="ml-1.5 px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-full">H-${diffDays}</span>`;
+            }
+
+            return `<div class="flex items-center"><span class="text-sm text-primary-600 dark:text-primary-400 font-medium"><i class="fa-regular fa-calendar-check mr-1"></i>${formatDate(dateString)}</span>${badge}</div>`;
         }
 
         function renderTable() {
+            if (!jobTableBody) return;
             jobTableBody.innerHTML = '';
-            const searchTerm = searchInput.value.toLowerCase();
-            const filterValue = statusFilter.value;
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const filterValue = statusFilter?.value || '';
             let displayJobs = [...jobs].sort((a, b) => new Date(b.dateApplied) - new Date(a.dateApplied));
 
             if (searchTerm) {
                 displayJobs = displayJobs.filter(job => 
                     job.company.toLowerCase().includes(searchTerm) || 
                     job.position.toLowerCase().includes(searchTerm) ||
+                    (job.source && job.source.toLowerCase().includes(searchTerm)) ||
                     (job.notes && job.notes.toLowerCase().includes(searchTerm))
                 );
             }
@@ -1064,39 +1111,54 @@
                 displayJobs = displayJobs.filter(job => job.status === filterValue);
             }
 
+            const parentWrapper = jobTableBody.parentElement ? jobTableBody.parentElement.parentElement : null;
+
             if (displayJobs.length === 0) {
-                jobTableBody.parentElement.parentElement.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
+                if (parentWrapper) parentWrapper.classList.add('hidden');
+                if (emptyState) {
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                }
             } else {
-                jobTableBody.parentElement.parentElement.classList.remove('hidden');
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
+                if (parentWrapper) parentWrapper.classList.remove('hidden');
+                if (emptyState) {
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                }
 
                 displayJobs.forEach(job => {
                     const tr = document.createElement('tr');
                     tr.className = `hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group`;
                     
-                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-2" title="Buka Lowongan"><i class="fa-solid fa-external-link-alt text-xs"></i></a>` : '';
+                    const urlLink = job.jobUrl ? `<a href="${job.jobUrl}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline ml-1.5" title="Buka Lowongan"><i class="fa-solid fa-up-right-from-square text-xs"></i></a>` : '';
+                    
+                    const metaTags = [];
+                    if (job.source) metaTags.push(`<span class="text-[11px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded"><i class="fa-solid fa-globe mr-1 text-[10px]"></i>${escapeAttr(job.source)}</span>`);
+                    if (job.salary) metaTags.push(`<span class="text-[11px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded"><i class="fa-solid fa-money-bill-wave mr-1 text-[10px]"></i>${escapeAttr(job.salary)}</span>`);
+                    if (job.pic) metaTags.push(`<span class="text-[11px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded"><i class="fa-regular fa-id-badge mr-1 text-[10px]"></i>${escapeAttr(job.pic)}</span>`);
+
+                    const notesPreview = job.notes ? `<p class="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs truncate" title="${escapeAttr(job.notes)}"><i class="fa-regular fa-note-sticky mr-1"></i>${escapeAttr(job.notes)}</p>` : '';
 
                     tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4">
                             <div class="flex flex-col">
-                                <span class="font-medium text-gray-900 dark:text-white flex items-center gap-1">${job.position} ${urlLink}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-regular fa-building mr-1"></i>${job.company}</span>
+                                <span class="font-semibold text-gray-900 dark:text-white flex items-center">${escapeAttr(job.position)} ${urlLink}</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400 mt-0.5"><i class="fa-regular fa-building mr-1"></i>${escapeAttr(job.company)}</span>
+                                ${metaTags.length > 0 ? `<div class="flex flex-wrap gap-1.5 mt-1.5">${metaTags.join('')}</div>` : ''}
+                                ${notesPreview}
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-300">
                             ${formatDate(job.dateApplied)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${getStatusBadge(job.status)}
+                            ${getStatusBadge(job.status, job.id)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${job.nextSchedule ? `<span class="text-sm text-primary-600 dark:text-primary-400 font-medium"><i class="fa-regular fa-calendar-check mr-1"></i>${formatDate(job.nextSchedule)}</span>` : '<span class="text-gray-400 dark:text-gray-600">-</span>'}
+                            ${getScheduleReminder(job.nextSchedule)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="flex justify-end gap-2">
                                 <button type="button" onclick="window.editJob('${job.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Edit Data"><i class="fa-solid fa-pen"></i></button>
                                 <button type="button" onclick="window.confirmDelete('${job.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/30" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>
                             </div>
@@ -1113,6 +1175,7 @@
             const finalJobId = formJobId || generateId();
             
             const newJob = {
+                id: finalJobId,
                 company: document.getElementById('company').value,
                 position: document.getElementById('position').value,
                 dateApplied: document.getElementById('dateApplied').value,
@@ -1136,30 +1199,26 @@
                     await setDoc(jobRef, newJob);
                     showToast("Tersimpan!", "Data berhasil disimpan ke akun Google Anda.", "success");
                 } catch (error) {
-                    // Fallback simpan lokal jika rules Firestore belum dipublish
-                    saveJobLocally(formJobId, finalJobId, newJob);
+                    console.warn("Cloud save error, saving locally:", error);
                 }
-            } else {
-                saveJobLocally(formJobId, finalJobId, newJob);
             }
 
-            submitBtn.innerText = originalText; submitBtn.disabled = false;
-            window.closeModal();
-        });
-
-        function saveJobLocally(formJobId, finalJobId, newJob) {
-            newJob.id = finalJobId;
             if (formJobId) {
-                const index = jobs.findIndex(j => j.id === formJobId);
-                if (index !== -1) jobs[index] = { ...jobs[index], ...newJob };
+                const idx = jobs.findIndex(j => j.id === formJobId);
+                if (idx !== -1) jobs[idx] = newJob;
+                else jobs.push(newJob);
             } else {
                 jobs.push(newJob);
             }
+
             localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
             renderTable();
             updateStats();
+
+            submitBtn.innerText = originalText; submitBtn.disabled = false;
+            window.closeModal();
             showToast("Tersimpan!", "Data lamaran berhasil disimpan.", "success");
-        }
+        });
 
         document.getElementById('confirm-btn').addEventListener('click', async () => {
             if (jobToDelete) {
@@ -1169,35 +1228,59 @@
 
                 if (userId && !isOfflineMode) {
                     try {
-                        const jobRef = doc(db, 'users', userId, 'jobs', jobToDelete);
-                        await deleteDoc(jobRef);
-                        showToast("Terhapus!", "Data berhasil dihapus.", "success");
-                    } catch (error) {
-                        jobs = jobs.filter(j => j.id !== jobToDelete);
-                        localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                        renderTable(); updateStats();
-                        showToast("Terhapus!", "Data berhasil dihapus.", "success");
+                        await deleteDoc(doc(db, 'users', userId, 'jobs', jobToDelete));
+                    } catch (e) {
+                        console.warn("Cloud delete fallback:", e);
                     }
-                } else {
-                    jobs = jobs.filter(j => j.id !== jobToDelete);
-                    localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                    renderTable(); updateStats();
-                    showToast("Terhapus!", "Data berhasil dihapus.", "success");
                 }
+
+                jobs = jobs.filter(j => j.id !== jobToDelete);
+                localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
+                renderTable();
+                updateStats();
 
                 btn.innerText = origText; btn.disabled = false;
                 window.closeConfirmModal();
+                showToast("Terhapus", "Data berhasil dihapus.", "info");
             }
         });
 
+        window.exportToExcelCSV = function() {
+            if (jobs.length === 0 && careerLinks.length === 0) {
+                return showToast("Data Kosong", "Belum ada data untuk di-export ke Excel.", "warning");
+            }
+            const headers = ["Perusahaan", "Posisi", "Tanggal Melamar", "Status", "Jadwal Selanjutnya", "Sumber", "Kontak HR", "Gaji", "Link Lowongan", "Catatan"];
+            const rows = jobs.map(j => [
+                j.company || '', j.position || '', j.dateApplied || '', j.status || '',
+                j.nextSchedule || '', j.source || '', j.pic || '', j.salary || '', j.jobUrl || '', j.notes || ''
+            ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+
+            const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Lamaran_Kerja_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            showToast("Export Excel Berhasil", "File .CSV siap dibuka di Microsoft Excel.", "success");
+        };
+
         window.exportToCSV = function() {
-            if (jobs.length === 0) return showToast("Data Kosong", "Tidak ada data lamaran untuk di-export.", "warning");
-            const jsonContent = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jobs));
+            if (jobs.length === 0 && careerLinks.length === 0) {
+                return showToast("Data Kosong", "Tidak ada data untuk di-backup.", "warning");
+            }
+            const backupPayload = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                jobs: jobs,
+                careerLinks: careerLinks
+            };
+            const jsonContent = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
             const linkJSON = document.createElement("a");
             linkJSON.setAttribute("href", jsonContent);
             linkJSON.setAttribute("download", `Backup_JobTracker_${new Date().toISOString().split('T')[0]}.json`);
             document.body.appendChild(linkJSON); linkJSON.click(); document.body.removeChild(linkJSON);
-            showToast("Sukses Export", "File JSON (Backup) berhasil didownload.", "success");
+            showToast("Sukses Backup", "Seluruh data Lamaran & Catatan Excel berhasil didownload.", "success");
         };
 
         window.importData = function(event) {
@@ -1206,29 +1289,129 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importedJobs = JSON.parse(e.target.result);
-                    if (Array.isArray(importedJobs)) {
+                    const parsed = JSON.parse(e.target.result);
+                    const importedJobs = Array.isArray(parsed) ? parsed : (parsed.jobs || []);
+                    const importedLinks = (!Array.isArray(parsed) && Array.isArray(parsed.careerLinks)) ? parsed.careerLinks : [];
+
+                    let addedJobs = 0;
+                    let addedLinks = 0;
+
+                    if (importedJobs.length > 0) {
                         const existingIds = new Set(jobs.map(j => j.id));
-                        let addedCount = 0;
                         importedJobs.forEach(job => {
-                            if (!existingIds.has(job.id)) { jobs.push(job); addedCount++; }
+                            if (!existingIds.has(job.id)) {
+                                jobs.push(job);
+                                addedJobs++;
+                                if (userId && !isOfflineMode) {
+                                    setDoc(doc(db, 'users', userId, 'jobs', job.id), job).catch(() => {});
+                                }
+                            }
                         });
                         localStorage.setItem('jobTrackerData_v1', JSON.stringify(jobs));
-                        renderTable(); updateStats();
-                        showToast("Import Berhasil", `${addedCount} data baru berhasil ditambahkan.`, "success");
                     }
+
+                    if (importedLinks.length > 0) {
+                        const existingLinkIds = new Set(careerLinks.map(l => l.id));
+                        importedLinks.forEach(linkItem => {
+                            if (!existingLinkIds.has(linkItem.id)) {
+                                careerLinks.push(linkItem);
+                                addedLinks++;
+                                if (userId && !isOfflineMode) {
+                                    setDoc(doc(db, 'users', userId, 'career_links', linkItem.id), linkItem).catch(() => {});
+                                }
+                            }
+                        });
+                        localStorage.setItem('jobTrackerLinks_v1', JSON.stringify(careerLinks));
+                    }
+
+                    renderTable(); updateStats(); renderSheetTable();
+                    showToast("Import Berhasil", `${addedJobs} lamaran & ${addedLinks} catatan link berhasil dipulihkan.`, "success");
                 } catch (error) {
-                    showToast("Gagal Import", "File tidak valid.", "error");
+                    showToast("Gagal Import", "Format file backup tidak valid.", "error");
                 }
                 event.target.value = ''; 
             };
             reader.readAsText(file);
         };
 
-        searchInput.addEventListener('input', () => renderTable());
-        statusFilter.addEventListener('change', () => renderTable());
+        const quickSheetForm = document.getElementById('quick-sheet-form');
+        if (quickSheetForm) {
+            quickSheetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('quick-name').value.trim();
+                const category = document.getElementById('quick-category').value;
+                const url = document.getElementById('quick-url').value.trim();
+                const notes = document.getElementById('quick-notes').value.trim();
 
-        init();
+                if (!name) return;
+
+                window.addSheetRow({
+                    id: generateId(),
+                    name,
+                    category,
+                    url,
+                    notes,
+                    createdAt: Date.now()
+                });
+
+                quickSheetForm.reset();
+                showToast("Baris Ditambahkan", "Catatan karir baru berhasil disimpan.", "success");
+            });
+        }
+
+        const sheetSearchInput = document.getElementById('sheetSearchInput');
+        if (sheetSearchInput) {
+            sheetSearchInput.addEventListener('input', () => renderSheetTable());
+        }
+
+        if (searchInput) searchInput.addEventListener('input', () => renderTable());
+        if (statusFilter) statusFilter.addEventListener('change', () => renderTable());
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function updateStats() {
+            const total = jobs.length;
+            const interview = jobs.filter(j => ['Interview HR', 'Interview User', 'Tes Teknis'].includes(j.status)).length;
+            const offered = jobs.filter(j => j.status === 'Diterima').length;
+            const rejected = jobs.filter(j => j.status === 'Ditolak').length;
+
+            const elTotal = document.getElementById('stat-total');
+            const elInterview = document.getElementById('stat-interview');
+            const elOffered = document.getElementById('stat-offered');
+            const elRejected = document.getElementById('stat-rejected');
+
+            if (elTotal) elTotal.innerText = total;
+            if (elInterview) elInterview.innerText = interview;
+            if (elOffered) elOffered.innerText = offered;
+            if (elRejected) elRejected.innerText = rejected;
+        }
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                if (themeIcon) {
+                    themeIcon.className = isDark ? 'fa-solid fa-sun text-yellow-400 text-lg' : 'fa-solid fa-moon text-gray-600 dark:text-gray-300 text-lg';
+                }
+            });
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-yellow-400 text-lg';
+        }
+
+        initCloud();
     </script>
 </body>
 </html>
